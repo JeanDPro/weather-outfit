@@ -1,0 +1,3289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" id="themeColorMeta" content="#0f172a" />
+  <title>Что надеть? — Умный погодный стилист</title>
+  <!-- Подключаем шрифт Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <!-- Подключаем Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Базовые настройки и плавные переходы темы */
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      background-color: #0f172a;
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      overflow-x: hidden;
+      transition: background-color 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+
+    /* Полноэкранный бесшовный фон с запасом за пределами экрана (убирает белые поля при скролле) */
+    #ambientBgLayer {
+      position: fixed;
+      top: -30vh;
+      bottom: -30vh;
+      left: -20vw;
+      right: -20vw;
+      min-height: 160vh;
+      z-index: -1;
+      pointer-events: none;
+      transition: background 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 5 динамических атмосферных тем */
+    body.theme-clear-day #ambientBgLayer {
+      background: linear-gradient(165deg, #0284c7 0%, #0ea5e9 38%, #38bdf8 68%, #f59e0b 100%);
+    }
+
+    body.theme-cloudy #ambientBgLayer {
+      background: linear-gradient(165deg, #1e293b 0%, #334155 45%, #475569 78%, #64748b 100%);
+    }
+
+    body.theme-rain #ambientBgLayer {
+      background: linear-gradient(165deg, #0f172a 0%, #1e1b4b 48%, #1d4ed8 85%, #1e3a8a 100%);
+    }
+
+    body.theme-snow #ambientBgLayer {
+      background: linear-gradient(165deg, #0c4a6e 0%, #0369a1 42%, #0284c7 75%, #38bdf8 100%);
+    }
+
+    body.theme-night #ambientBgLayer {
+      background: linear-gradient(165deg, #090d16 0%, #1e1b4b 52%, #311042 86%, #1e1b4b 100%);
+    }
+
+    /* Стеклянные карточки (Glassmorphism) с высоким контрастом */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.46);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 20px 40px -15px rgba(2, 6, 23, 0.45);
+      transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.28);
+      background: rgba(15, 23, 42, 0.54);
+    }
+
+    .glass-subcard {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease;
+    }
+
+    .glass-subcard:hover {
+      background: rgba(255, 255, 255, 0.13);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    /* Декоративные световые пятна на фоне */
+    .ambient-orb {
+      position: fixed;
+      border-radius: 9999px;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+      transition: background 0.9s ease, opacity 0.9s ease;
+    }
+
+    body.theme-clear-day .orb-1 {
+      background: radial-gradient(circle, rgba(253, 224, 71, 0.65), transparent 70%);
+    }
+    body.theme-clear-day .orb-2 {
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.55), transparent 70%);
+    }
+
+    body.theme-cloudy .orb-1 {
+      background: radial-gradient(circle, rgba(148, 163, 184, 0.35), transparent 70%);
+    }
+    body.theme-cloudy .orb-2 {
+      background: radial-gradient(circle, rgba(51, 65, 85, 0.5), transparent 70%);
+    }
+
+    body.theme-rain .orb-1 {
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent 70%);
+    }
+    body.theme-rain .orb-2 {
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.45), transparent 70%);
+    }
+
+    body.theme-snow .orb-1 {
+      background: radial-gradient(circle, rgba(224, 242, 254, 0.55), transparent 70%);
+    }
+    body.theme-snow .orb-2 {
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.45), transparent 70%);
+    }
+
+    body.theme-night .orb-1 {
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.35), transparent 70%);
+    }
+    body.theme-night .orb-2 {
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent 70%);
+    }
+
+    /* Анимация дождя на фоне */
+    .weather-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .rain-drop {
+      position: absolute;
+      top: -20px;
+      width: 1.5px;
+      height: 18px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(186, 230, 253, 0.55));
+      border-radius: 999px;
+      animation: fallRain linear infinite;
+    }
+
+    @keyframes fallRain {
+      0% {
+        transform: translateY(-20px) translateX(0);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(105vh) translateX(-18px);
+        opacity: 0;
+      }
+    }
+
+    /* Анимация снега на фоне */
+    .snow-flake {
+      position: absolute;
+      top: -12px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 9999px;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+      animation: fallSnow linear infinite;
+    }
+
+    @keyframes fallSnow {
+      0% {
+        transform: translateY(-10px) translateX(0);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.85;
+      }
+      50% {
+        transform: translateY(50vh) translateX(18px);
+      }
+      100% {
+        transform: translateY(105vh) translateX(-12px);
+        opacity: 0.2;
+      }
+    }
+
+    /* Мерцающие звёзды для ночной темы */
+    .star-dot {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 9999px;
+      box-shadow: 0 0 8px rgba(199, 210, 254, 0.8);
+      animation: twinkleStar ease-in-out infinite;
+    }
+
+    @keyframes twinkleStar {
+      0%, 100% {
+        opacity: 0.25;
+        transform: scale(0.85);
+      }
+      50% {
+        opacity: 0.95;
+        transform: scale(1.15);
+      }
+    }
+
+    /* Плавное появление контента */
+    .fade-in-up {
+      animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Кастомный скроллбар для выпадающего списка */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="theme-cloudy antialiased selection:bg-sky-400 selection:text-slate-950">
+  <!-- Бесшовный фоновый слой без белых границ при оттягивании страницы -->
+  <div id="ambientBgLayer" aria-hidden="true"></div>
+  <!-- Атмосферные световые пятна и частицы осадков -->
+  <div class="ambient-orb orb-1 w-96 h-96 -top-20 -right-16"></div>
+  <div class="ambient-orb orb-2 w-[28rem] h-[28rem] -bottom-24 -left-20"></div>
+  <div id="weatherParticles" class="weather-particles" aria-hidden="true"></div>
+
+  <!-- Основной контейнер приложения -->
+  <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+    
+    <!-- 1. ВЕРХНЯЯ ПАНЕЛЬ (HEADER) -->
+    <header class="glass-card rounded-3xl p-4 sm:p-5 mb-5 relative z-30">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        
+        <!-- Логотип и название -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/25 border border-white/25 shrink-0">
+              <!-- SVG Логотип: вешалка + солнце -->
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="17.5" cy="6.5" r="2.5" class="text-amber-300" fill="currentColor" stroke="none"/>
+                <path d="M12 6a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V11l7.4 4.44A1.5 1.5 0 0 1 19.63 18H4.37a1.5 1.5 0 0 1-.77-2.56L11 11V9.73" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 id="brandTitle" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Что надеть?</h1>
+                <span id="brandBadge" class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-sky-200 border border-white/15">
+                  AI-логика
+                </span>
+              </div>
+              <p id="brandSubtitle" class="text-xs sm:text-sm text-slate-300 font-medium">Умный погодный стилист на каждый день</p>
+            </div>
+          </div>
+
+          <!-- Переключатель языка + Кнопка GPS для мобильных в шапке -->
+          <div class="lg:hidden flex items-center gap-2">
+            <div class="inline-flex items-center p-1 rounded-xl bg-slate-950/45 border border-white/15" role="group" aria-label="Language switch">
+              <button type="button" data-lang="ru" class="lang-toggle-btn px-2 py-1 rounded-lg text-xs font-bold transition">RU</button>
+              <button type="button" data-lang="en" class="lang-toggle-btn px-2 py-1 rounded-lg text-xs font-bold transition">EN</button>
+            </div>
+
+            <button
+              id="geoBtnMobile"
+              type="button"
+              title="Определить моё местоположение"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/12 hover:bg-white/20 active:scale-95 text-xs font-semibold text-white border border-white/15 transition"
+            >
+              <svg class="w-4 h-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+              <span id="geoBtnMobileLabel">Рядом</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Поиск города + быстрые города + GPS + Язык -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 lg:w-auto flex-1 lg:max-w-2xl">
+          <!-- Поле живого поиска -->
+          <div class="relative flex-1">
+            <div class="relative flex items-center">
+              <svg class="w-4 h-4 text-slate-300 absolute left-3.5 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3" stroke-linecap="round"/>
+              </svg>
+              <input
+                id="citySearchInput"
+                type="text"
+                autocomplete="off"
+                placeholder="Поиск города (например, Минск, Берлин...)"
+                class="w-full pl-10 pr-9 py-2.5 rounded-xl bg-slate-950/45 border border-white/15 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/25 transition"
+              />
+              <button
+                id="clearSearchBtn"
+                type="button"
+                aria-label="Очистить поиск"
+                class="hidden absolute right-2.5 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Выпадающий список подсказок городов -->
+            <div
+              id="searchDropdown"
+              class="hidden absolute left-0 right-0 mt-2 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden z-50 max-h-64 overflow-y-auto custom-scroll"
+            ></div>
+          </div>
+
+          <!-- Кнопка Рядом (Десктоп) -->
+          <button
+            id="geoBtnDesktop"
+            type="button"
+            title="Определить моё местоположение"
+            class="hidden lg:inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-sky-500/25 hover:bg-sky-500/35 active:scale-95 text-sm font-semibold text-sky-100 border border-sky-400/30 transition shrink-0"
+          >
+            <svg class="w-4 h-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="5"/>
+              <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+            <span id="geoBtnDesktopLabel">Рядом</span>
+          </button>
+
+          <!-- Переключатель языка RU / EN (Десктоп) -->
+          <div class="hidden lg:inline-flex items-center p-1 rounded-xl bg-slate-950/45 border border-white/15 shrink-0" role="group" aria-label="Language switch">
+            <button type="button" data-lang="ru" class="lang-toggle-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition">RU</button>
+            <button type="button" data-lang="en" class="lang-toggle-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition">EN</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Быстрый выбор популярных городов -->
+      <div class="mt-3.5 pt-3 border-t border-white/10 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <span id="quickLabel" class="text-xs font-medium text-slate-400 shrink-0 mr-1">Быстро:</span>
+        <div id="quickCitiesContainer" class="flex items-center gap-1.5 shrink-0"></div>
+      </div>
+    </header>
+
+    <!-- 2. ПАНЕЛЬ ПЕРСОНАЛЬНЫХ НАСТРОЕК (ПИЛЮЛИ) -->
+    <section class="glass-card rounded-3xl p-3.5 sm:p-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        
+        <!-- Переключатель стиля -->
+        <div class="flex flex-col gap-1.5">
+          <span id="styleSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Стиль гардероба</span>
+          <div class="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Стиль одежды">
+            <button
+              id="styleCasualBtn"
+              type="button"
+              data-setting="style"
+              data-value="casual"
+              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              👟 Кэжуал
+            </button>
+            <button
+              id="styleSmartBtn"
+              type="button"
+              data-setting="style"
+              data-value="smart"
+              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              🧥 Смарт-кэжуал
+            </button>
+          </div>
+        </div>
+
+        <!-- Переключатель теплоощущения -->
+        <div class="flex flex-col gap-1.5">
+          <span id="thermalSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Как ощущаешь холод</span>
+          <div class="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Теплоощущение">
+            <button
+              id="thermalColdBtn"
+              type="button"
+              data-setting="thermal"
+              data-value="cold"
+              class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              ❄️ Мерзляк
+            </button>
+            <button
+              id="thermalNormalBtn"
+              type="button"
+              data-setting="thermal"
+              data-value="normal"
+              class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              👌 Норма
+            </button>
+            <button
+              id="thermalHotBtn"
+              type="button"
+              data-setting="thermal"
+              data-value="hot"
+              class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              🔥 Жарко
+            </button>
+          </div>
+        </div>
+
+        <!-- Переключатель способа передвижения -->
+        <div class="flex flex-col gap-1.5">
+          <span id="transportSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Как передвигаешься</span>
+          <div class="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Способ передвижения">
+            <button
+              id="transportWalkBtn"
+              type="button"
+              data-setting="transport"
+              data-value="walk"
+              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              🚶 Пешком
+            </button>
+            <button
+              id="transportCarBtn"
+              type="button"
+              data-setting="transport"
+              data-value="car"
+              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+            >
+              🚗 На машине
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2.5. ИНТЕРАКТИВНАЯ ПАНЕЛЬ ПРОГНОЗА НА 7 ДНЕЙ -->
+    <section class="glass-card rounded-3xl p-4 sm:p-5 mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-2.5 mb-3.5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="weeklyHeading" class="text-sm sm:text-base font-bold text-white leading-tight">Прогноз на 7 дней</h2>
+            <p id="weeklySubtitle" class="text-[11px] sm:text-xs text-slate-300">Выбери любой день недели, чтобы собрать образ заранее</p>
+          </div>
+        </div>
+
+        <button
+          id="backToTodayBtn"
+          type="button"
+          class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/25 hover:bg-sky-500/35 active:scale-95 text-xs font-semibold text-sky-100 border border-sky-400/35 transition"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 3v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span id="backToTodayLabel">Вернуться к сегодня</span>
+        </button>
+      </div>
+
+      <!-- 7 карточек дней недели -->
+      <div
+        id="weeklyDaysGrid"
+        class="grid grid-flow-col auto-cols-[minmax(106px,1fr)] lg:grid-flow-row lg:grid-cols-7 gap-2.5 overflow-x-auto pb-1.5 lg:pb-0 custom-scroll"
+      >
+        <!-- Карточки дней заполняются через JS -->
+      </div>
+    </section>
+
+    <!-- 3. ОСНОВНОЙ ЭКРАН (BENTO-СЕТКА: СЛЕВА ПОГОДА 5/12, СПРАВА ГАРДЕРОБ 7/12) -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+      
+      <!-- ЛЕВАЯ КОЛОНКА: ТЕКУЩАЯ ПОГОДА + СРЕЗ ДНЯ (5/12) -->
+      <div class="lg:col-span-5 flex flex-col gap-5">
+        
+        <!-- Карточка текущей погоды -->
+        <section class="glass-card glass-card-hover rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <!-- Шапка карточки с городом и статусом источника -->
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-sky-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <h2 id="currentCityName" class="text-xl sm:text-2xl font-bold text-white leading-tight">Кишинёв</h2>
+              </div>
+              <p id="currentCountryDate" class="text-xs sm:text-sm text-slate-300 mt-0.5">Молдова • Загрузка данных...</p>
+            </div>
+
+            <span
+              id="dataSourceBadge"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 shrink-0"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Онлайн
+            </span>
+          </div>
+
+          <!-- Главные цифры и SVG-иконка погоды -->
+          <div class="flex items-center justify-between my-4 py-2">
+            <div>
+              <div id="tempModeLabel" class="text-[11px] font-semibold uppercase tracking-wider text-sky-200/90 mb-1">
+                Сейчас на улице
+              </div>
+              <div class="flex items-start">
+                <span id="currentTemp" class="text-6xl sm:text-7xl font-extrabold tracking-tighter text-white leading-none font-mono">+12°</span>
+              </div>
+              <div class="mt-2.5 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-xl bg-white/10 text-xs sm:text-sm font-semibold text-sky-200 border border-white/10">
+                  <span id="feelsLikePrefix">Ощущается как</span> <strong id="feelsLikeTemp" class="ml-1 text-white font-mono">+10°</strong>
+                </span>
+              </div>
+              <p id="weatherConditionText" class="text-sm sm:text-base font-medium text-slate-200 mt-2">Переменная облачность</p>
+            </div>
+
+            <!-- Контейнер большой SVG-иконки погоды -->
+            <div id="mainWeatherIcon" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center shrink-0"></div>
+          </div>
+
+          <!-- Метрики: Ветер, Влажность, Осадки -->
+          <div class="grid grid-cols-3 gap-2.5 pt-4 border-t border-white/10">
+            <div class="glass-subcard rounded-2xl p-3">
+              <div class="flex items-center gap-1.5 text-slate-300 text-xs mb-1">
+                <svg class="w-3.5 h-3.5 text-sky-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" stroke-linecap="round"/>
+                  <path d="M9.6 4.6A2 2 0 1 1 11 8H2" stroke-linecap="round"/>
+                  <path d="M12.6 19.4A2 2 0 1 0 14 16H2" stroke-linecap="round"/>
+                </svg>
+                <span id="windLabel">Ветер</span>
+              </div>
+              <div id="windSpeedValue" class="text-sm sm:text-base font-bold text-white font-mono">14 км/ч</div>
+              <div id="windGustsValue" class="text-[11px] text-slate-400 mt-0.5">Порывы 22</div>
+            </div>
+
+            <div class="glass-subcard rounded-2xl p-3">
+              <div class="flex items-center gap-1.5 text-slate-300 text-xs mb-1">
+                <svg class="w-3.5 h-3.5 text-cyan-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <span id="humidityLabel">Влажность</span>
+              </div>
+              <div id="humidityValue" class="text-sm sm:text-base font-bold text-white font-mono">64%</div>
+              <div id="humidityNote" class="text-[11px] text-slate-400 mt-0.5">Комфортно</div>
+            </div>
+
+            <div class="glass-subcard rounded-2xl p-3">
+              <div class="flex items-center gap-1.5 text-slate-300 text-xs mb-1">
+                <svg class="w-3.5 h-3.5 text-indigo-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                  <path d="M8 19v2m8-2v2m-4-1v2" stroke-linecap="round"/>
+                </svg>
+                <span id="precipLabel">Осадки</span>
+              </div>
+              <div id="precipProbValue" class="text-sm sm:text-base font-bold text-white font-mono">15%</div>
+              <div id="precipNote" class="text-[11px] text-slate-400 mt-0.5">Сухо</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Блок «Срез дня» (Утро, День, Вечер) -->
+        <section class="glass-card glass-card-hover rounded-3xl p-5">
+          <div class="flex items-center justify-between gap-2 mb-3.5">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span id="daySliceHeading">Срез дня</span>
+            </h3>
+            <span id="tempSwingBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-slate-200 border border-white/10">
+              Перепад 6°C
+            </span>
+          </div>
+
+          <div id="daySliceGrid" class="grid grid-cols-3 gap-2.5">
+            <!-- Заполняется через JS -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ПРАВАЯ КОЛОНКА: ВЕРДИКТ + ГАРДЕРОБ + АКСЕССУАРЫ (7/12) -->
+      <div class="lg:col-span-7 flex flex-col gap-5">
+        
+        <!-- Главная карточка «Вердикт на сегодня» -->
+        <section class="glass-card glass-card-hover rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 border border-sky-400/30">
+              <span class="text-sm">✨</span>
+              <span id="verdictHeading" class="text-xs font-bold uppercase tracking-wider text-sky-200">Вердикт на сегодня</span>
+            </div>
+            <span id="effectiveTempTag" class="text-xs font-medium text-slate-300 font-mono">
+              Расчёт по ощущению: +10°C
+            </span>
+          </div>
+
+          <p id="verdictText" class="text-base sm:text-lg font-medium text-white leading-relaxed">
+            Анализируем погоду и подбираем оптимальные слои одежды...
+          </p>
+
+          <!-- Полоса «Аксессуары и детали» -->
+          <div class="mt-4 pt-4 border-t border-white/10">
+            <div id="accessoriesSectionLabel" class="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2.5">Аксессуары и детали</div>
+            <div id="accessoriesList" class="flex flex-wrap gap-2">
+              <!-- Бейджи аксессуаров через JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Сетка гардероба 2×2 -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="wardrobeGrid">
+          <!-- 4 карточки гардероба генерируются через JS -->
+        </section>
+
+        <!-- Панель действий: Скопировать образ -->
+        <div class="glass-card rounded-3xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div id="copyHelperText" class="text-xs sm:text-sm text-slate-300 text-center sm:text-left">
+            Собираетесь выходить или обсуждаете планы с друзьями? Отправьте готовый чек-лист в один клик.
+          </div>
+          <button
+            id="copyOutfitBtn"
+            type="button"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 active:scale-[0.98] text-sm font-bold text-white shadow-lg shadow-sky-500/25 border border-white/20 transition shrink-0"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span id="copyOutfitBtnLabel">Скопировать образ</span>
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- 4. ВСТРОЕННЫЙ ТЕСТ-СИМУЛЯТОР ПОГОДЫ -->
+    <footer class="mt-6">
+      <div class="glass-card rounded-3xl p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-300/30 flex items-center justify-center text-amber-300 shrink-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+            </div>
+            <div>
+              <h4 id="simulatorHeading" class="text-sm font-bold text-white">Тест-симулятор погоды</h4>
+              <p id="simulatorSubtitle" class="text-xs text-slate-300">Проверь, как стилист подбирает вещи в любую крайность</p>
+            </div>
+          </div>
+
+          <button
+            id="toggleSimulatorBtn"
+            type="button"
+            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold text-white border border-white/15 transition self-start sm:self-auto"
+          >
+            <span id="toggleSimulatorLabel">Открыть сценарии</span>
+            <svg id="toggleSimulatorChevron" class="w-4 h-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Раскрываемая панель пресетов -->
+        <div id="simulatorPanel" class="hidden mt-4 pt-4 border-t border-white/10">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5" id="simulatorPresetsGrid">
+            <!-- Кнопки сценариев заполняются через JS -->
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Всплывающее уведомление (Toast) -->
+  <div
+    id="toastNotification"
+    role="status"
+    aria-live="polite"
+    class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-4 transition-all duration-300"
+  >
+    <div class="px-4 py-3 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl flex items-center gap-2.5 text-sm font-semibold text-white">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+      <span id="toastMessage">Скопировано!</span>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * УМНЫЙ ПОГОДНЫЙ СТИЛИСТ «ЧТО НАДЕТЬ?» / "WHAT TO WEAR?"
+     * Вся логика: Open-Meteo API, геокодинг, локализация RU/EN, генератор образов
+     * ============================================================================
+     */
+
+    // Константы и начальные настройки
+    const STORAGE_KEY = 'what_to_wear_state_v2';
+
+    const I18N = {
+      ru: {
+        pageTitle: 'Что надеть? — Умный погодный стилист',
+        brandTitle: 'Что надеть?',
+        brandBadge: 'AI-логика',
+        brandSubtitle: 'Умный погодный стилист на каждый день',
+        geoBtn: 'Рядом',
+        geoTooltip: 'Определить моё местоположение',
+        searchPlaceholder: 'Поиск города (например, Минск, Берлин...)',
+        clearSearchAria: 'Очистить поиск',
+        quickLabel: 'Быстро:',
+        styleLabel: 'Стиль гардероба',
+        styleCasual: '👟 Кэжуал',
+        styleSmart: '🧥 Смарт-кэжуал',
+        thermalLabel: 'Как ощущаешь холод',
+        thermalCold: '❄️ Мерзляк',
+        thermalNormal: '👌 Норма',
+        thermalHot: '🔥 Жарко',
+        transportLabel: 'Как передвигаешься',
+        transportWalk: '🚶 Пешком',
+        transportCar: '🚗 На машине',
+        weeklyHeading: 'Прогноз на 7 дней',
+        weeklySubtitle: 'Выбери любой день недели, чтобы собрать образ заранее',
+        backToToday: 'Вернуться к сегодня',
+        today: 'Сегодня',
+        tomorrow: 'Завтра',
+        dry: 'Сухо',
+        statusUpdating: 'Обновление...',
+        statusSimulator: 'Симулятор',
+        statusOffline: 'Автономно',
+        statusOnline: 'Онлайн',
+        outsideNow: 'Сейчас на улице',
+        highLowTemplate: (max, min) => `Днём до ${max} • Ночью ${min}`,
+        feelsLike: 'Ощущается как',
+        wind: 'Ветер',
+        windUnit: 'км/ч',
+        gusts: (v) => `Порывы ${v}`,
+        humidity: 'Влажность',
+        humidityHumid: 'Сыро',
+        humidityDry: 'Сухой воздух',
+        humidityNormal: 'Норма',
+        precip: 'Осадки',
+        precipChance: 'Возможны осадки',
+        precipNone: 'Без осадков',
+        daySliceHeading: 'Срез дня',
+        swingLayers: (v) => `Перепад ${v}°C • Слои!`,
+        swingNormal: (v) => `Перепад ${v}°C`,
+        sliceMorning: 'Утро 08:00',
+        sliceAfternoon: 'День 14:00',
+        sliceEvening: 'Вечер 20:00',
+        sliceFeels: 'Ощущ.',
+        verdictToday: 'Вердикт на сегодня',
+        verdictTomorrow: 'Вердикт на завтра',
+        verdictFuture: (wd, dt) => `Вердикт на ${wd.toLowerCase()}, ${dt}`,
+        effectiveTempTag: (t) => `Расчёт по ощущению: ${t}C`,
+        accessoriesLabel: 'Аксессуары и детали',
+        cardBaseTop: 'Верх / База',
+        cardOuterwear: 'Верхняя одежда',
+        cardBottom: 'Низ',
+        cardShoes: 'Обувь',
+        copyHelperText: 'Собираетесь выходить или обсуждаете планы с друзьями? Отправьте готовый чек-лист в один клик.',
+        copyBtn: 'Скопировать образ',
+        copiedToast: 'Скопировано! Готово к отправке',
+        copyFailToast: 'Не удалось скопировать текст',
+        simulatorHeading: 'Тест-симулятор погоды',
+        simulatorSubtitle: 'Проверь, как стилист подбирает вещи в любую крайность',
+        openScenarios: 'Открыть сценарии',
+        hideScenarios: 'Скрыть сценарии',
+        searchingCities: 'Ищем города...',
+        noCitiesFound: 'Ничего не найдено. Попробуй другое написание.',
+        selectCityBtn: 'Выбрать',
+        searchError: 'Ошибка поиска. Проверь подключение к сети.',
+        geoUnsupported: 'Геолокация не поддерживается браузером',
+        geoDetecting: 'Определяем местоположение...',
+        myLocation: 'Моё местоположение',
+        geoUpdated: (name) => `Локация обновлена: ${name}`,
+        geoDenied: 'Доступ к геолокации закрыт — выбери город вручную',
+        modeToast: (label) => `Режим: ${label}`,
+        langToast: 'Язык: Русский',
+        simPresets: {
+          live: { label: '📡 Реальная погода', desc: 'Живой прогноз на 7 дней' },
+          frost: { label: '🥶 Зимний мороз и ветер', desc: 'Неделя морозов −8°…−15°C' },
+          rain: { label: '🌧️ Осенний ливень', desc: 'Затяжные дожди и сырость' },
+          swing: { label: '🌤️ Весенний перепад температур', desc: 'От +4°C утром до +19°C днём' },
+          heat: { label: '☀️ Летняя жара', desc: 'Солнечная неделя +27°…+32°C' },
+        },
+        weatherCodes: {
+          0: 'Ясное небо',
+          1: 'Преимущественно ясно',
+          2: 'Переменная облачность',
+          3: 'Пасмурно',
+          45: 'Туман',
+          48: 'Изморозь и туман',
+          51: 'Лёгкая морось',
+          53: 'Умеренная морось',
+          55: 'Плотная морось',
+          61: 'Небольшой дождь',
+          63: 'Умеренный дождь',
+          65: 'Сильный дождь',
+          66: 'Ледяной дождь',
+          67: 'Сильный ледяной дождь',
+          71: 'Небольшой снег',
+          73: 'Снегопад',
+          75: 'Сильный снегопад',
+          77: 'Снежная крупа',
+          80: 'Кратковременный дождь',
+          81: 'Ливневый дождь',
+          82: 'Сильный ливень',
+          85: 'Снежный заряд',
+          86: 'Сильный снегопад',
+          95: 'Гроза',
+          96: 'Гроза с мелким градом',
+          99: 'Сильная гроза с градом',
+          fallback: 'Переменчивая погода',
+        },
+      },
+      en: {
+        pageTitle: 'What to Wear? — Smart Weather Stylist',
+        brandTitle: 'What to Wear?',
+        brandBadge: 'Smart Logic',
+        brandSubtitle: 'Your smart daily outfit & weather stylist',
+        geoBtn: 'Near me',
+        geoTooltip: 'Detect my current location',
+        searchPlaceholder: 'Search city (e.g., London, Berlin...)',
+        clearSearchAria: 'Clear search',
+        quickLabel: 'Quick:',
+        styleLabel: 'Wardrobe style',
+        styleCasual: '👟 Casual',
+        styleSmart: '🧥 Smart Casual',
+        thermalLabel: 'Cold sensitivity',
+        thermalCold: '❄️ Cold-sensitive',
+        thermalNormal: '👌 Normal',
+        thermalHot: '🔥 Runs hot',
+        transportLabel: 'Commute mode',
+        transportWalk: '🚶 On foot',
+        transportCar: '🚗 By car',
+        weeklyHeading: '7-Day Forecast',
+        weeklySubtitle: 'Pick any day of the week to plan your outfit ahead',
+        backToToday: 'Back to Today',
+        today: 'Today',
+        tomorrow: 'Tomorrow',
+        dry: 'Dry',
+        statusUpdating: 'Updating...',
+        statusSimulator: 'Simulator',
+        statusOffline: 'Offline',
+        statusOnline: 'Live',
+        outsideNow: 'Outside right now',
+        highLowTemplate: (max, min) => `High ${max} • Low ${min}`,
+        feelsLike: 'Feels like',
+        wind: 'Wind',
+        windUnit: 'km/h',
+        gusts: (v) => `Gusts ${v}`,
+        humidity: 'Humidity',
+        humidityHumid: 'Humid',
+        humidityDry: 'Dry air',
+        humidityNormal: 'Normal',
+        precip: 'Precip',
+        precipChance: 'Chance of rain',
+        precipNone: 'Dry',
+        daySliceHeading: 'Day Breakdown',
+        swingLayers: (v) => `${v}°C swing • Layer up!`,
+        swingNormal: (v) => `${v}°C swing`,
+        sliceMorning: 'Morning 08:00',
+        sliceAfternoon: 'Afternoon 14:00',
+        sliceEvening: 'Evening 20:00',
+        sliceFeels: 'Feels',
+        verdictToday: "Today's Verdict",
+        verdictTomorrow: "Tomorrow's Verdict",
+        verdictFuture: (wd, dt) => `Verdict for ${wd}, ${dt}`,
+        effectiveTempTag: (t) => `Adjusted feels-like: ${t}C`,
+        accessoriesLabel: 'Accessories & Extras',
+        cardBaseTop: 'Top / Base Layer',
+        cardOuterwear: 'Outerwear',
+        cardBottom: 'Bottoms',
+        cardShoes: 'Footwear',
+        copyHelperText: 'Heading out or coordinating plans with friends? Share your ready-to-go outfit checklist in one click.',
+        copyBtn: 'Copy Outfit',
+        copiedToast: 'Copied! Ready to share',
+        copyFailToast: 'Could not copy text',
+        simulatorHeading: 'Weather Test Simulator',
+        simulatorSubtitle: 'Test how the stylist adapts outfits to extreme weather scenarios',
+        openScenarios: 'Open scenarios',
+        hideScenarios: 'Hide scenarios',
+        searchingCities: 'Searching cities...',
+        noCitiesFound: 'No cities found. Try a different spelling.',
+        selectCityBtn: 'Select',
+        searchError: 'Search error. Check your network connection.',
+        geoUnsupported: 'Geolocation is not supported by your browser',
+        geoDetecting: 'Detecting your location...',
+        myLocation: 'My Location',
+        geoUpdated: (name) => `Location updated: ${name}`,
+        geoDenied: 'Location access denied — please select a city manually',
+        modeToast: (label) => `Mode: ${label}`,
+        langToast: 'Language: English',
+        simPresets: {
+          live: { label: '📡 Live Weather', desc: 'Real 7-day forecast' },
+          frost: { label: '🥶 Winter Frost & Wind', desc: 'Freezing week −8°…−15°C' },
+          rain: { label: '🌧️ Autumn Downpour', desc: 'Heavy rain & damp chill' },
+          swing: { label: '🌤️ Spring Temp Swing', desc: 'From +4°C morning to +19°C day' },
+          heat: { label: '☀️ Summer Heatwave', desc: 'Sunny week +27°…+32°C' },
+        },
+        weatherCodes: {
+          0: 'Clear sky',
+          1: 'Mainly clear',
+          2: 'Partly cloudy',
+          3: 'Overcast',
+          45: 'Foggy',
+          48: 'Freezing fog',
+          51: 'Light drizzle',
+          53: 'Moderate drizzle',
+          55: 'Dense drizzle',
+          61: 'Slight rain',
+          63: 'Moderate rain',
+          65: 'Heavy rain',
+          66: 'Freezing rain',
+          67: 'Heavy freezing rain',
+          71: 'Slight snowfall',
+          73: 'Moderate snowfall',
+          75: 'Heavy snowfall',
+          77: 'Snow grains',
+          80: 'Rain showers',
+          81: 'Heavy rain showers',
+          82: 'Violent rain showers',
+          85: 'Snow showers',
+          86: 'Heavy snow showers',
+          95: 'Thunderstorm',
+          96: 'Thunderstorm with hail',
+          99: 'Severe thunderstorm',
+          fallback: 'Changeable weather',
+        },
+      },
+    };
+
+    const QUICK_CITIES = [
+      { id: 'chisinau', name: { ru: 'Кишинёв', en: 'Chișinău' }, country: { ru: 'Молдова', en: 'Moldova' }, lat: 47.0056, lon: 28.8575 },
+      { id: 'bucharest', name: { ru: 'Бухарест', en: 'Bucharest' }, country: { ru: 'Румыния', en: 'Romania' }, lat: 44.4268, lon: 26.1025 },
+      { id: 'prague', name: { ru: 'Прага', en: 'Prague' }, country: { ru: 'Чехия', en: 'Czechia' }, lat: 50.0755, lon: 14.4378 },
+      { id: 'paris', name: { ru: 'Париж', en: 'Paris' }, country: { ru: 'Франция', en: 'France' }, lat: 48.8566, lon: 2.3522 },
+      { id: 'istanbul', name: { ru: 'Стамбул', en: 'Istanbul' }, country: { ru: 'Турция', en: 'Türkiye' }, lat: 41.0082, lon: 28.9784 },
+    ];
+
+    function t() {
+      return I18N[state.lang] || I18N.ru;
+    }
+
+    function getLocalizedCityInfo(cityObj = state.city) {
+      const lang = state.lang;
+      const quickMatch = QUICK_CITIES.find(
+        (q) => Math.abs(q.lat - cityObj.lat) < 0.05 && Math.abs(q.lon - cityObj.lon) < 0.05
+      );
+      if (quickMatch) {
+        return {
+          name: quickMatch.name[lang],
+          country: quickMatch.country[lang],
+        };
+      }
+      if (cityObj.names && cityObj.names[lang]) {
+        return {
+          name: cityObj.names[lang],
+          country: (cityObj.countries && cityObj.countries[lang]) || cityObj.country || '',
+        };
+      }
+      return {
+        name: cityObj.name || t().myLocation,
+        country: cityObj.country || '',
+      };
+    }
+
+    // Вспомогательная генерация 7-дневного массива для сценариев симулятора
+    function buildSimulatedWeek(baseDays) {
+      const now = new Date();
+      return baseDays.map((dayCfg, idx) => {
+        const d = new Date(now);
+        d.setDate(now.getDate() + idx);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return {
+          dateISO: `${yyyy}-${mm}-${dd}`,
+          ...dayCfg,
+        };
+      });
+    }
+
+    const SIMULATOR_PRESETS = [
+      {
+        id: 'live',
+        isLive: true,
+      },
+      {
+        id: 'frost',
+        days: buildSimulatedWeek([
+          {
+            temp: -12, tempMax: -10, tempMin: -16, apparentTemp: -19, weatherCode: 0, isDay: 1,
+            windSpeed: 22, windGusts: 34, humidity: 58, precipProb: 5,
+            slices: [
+              { slot: 'morning', temp: -15, apparent: -22, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: -10, apparent: -17, code: 1, precip: 5 },
+              { slot: 'evening', temp: -14, apparent: -20, code: 0, precip: 5 },
+            ],
+          },
+          {
+            temp: -9, tempMax: -9, tempMin: -14, apparentTemp: -15, weatherCode: 73, isDay: 1,
+            windSpeed: 19, windGusts: 30, humidity: 78, precipProb: 75,
+            slices: [
+              { slot: 'morning', temp: -13, apparent: -19, code: 71, precip: 60 },
+              { slot: 'afternoon', temp: -9, apparent: -15, code: 73, precip: 75 },
+              { slot: 'evening', temp: -11, apparent: -17, code: 71, precip: 50 },
+            ],
+          },
+          {
+            temp: -7, tempMax: -7, tempMin: -12, apparentTemp: -12, weatherCode: 2, isDay: 1,
+            windSpeed: 14, windGusts: 21, humidity: 65, precipProb: 15,
+            slices: [
+              { slot: 'morning', temp: -11, apparent: -16, code: 2, precip: 10 },
+              { slot: 'afternoon', temp: -7, apparent: -12, code: 1, precip: 15 },
+              { slot: 'evening', temp: -10, apparent: -14, code: 2, precip: 10 },
+            ],
+          },
+          {
+            temp: -11, tempMax: -11, tempMin: -17, apparentTemp: -18, weatherCode: 0, isDay: 1,
+            windSpeed: 24, windGusts: 36, humidity: 54, precipProb: 0,
+            slices: [
+              { slot: 'morning', temp: -16, apparent: -23, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: -11, apparent: -18, code: 0, precip: 0 },
+              { slot: 'evening', temp: -15, apparent: -22, code: 0, precip: 0 },
+            ],
+          },
+          {
+            temp: -6, tempMax: -6, tempMin: -11, apparentTemp: -10, weatherCode: 3, isDay: 1,
+            windSpeed: 12, windGusts: 18, humidity: 70, precipProb: 25,
+            slices: [
+              { slot: 'morning', temp: -10, apparent: -14, code: 3, precip: 20 },
+              { slot: 'afternoon', temp: -6, apparent: -10, code: 3, precip: 25 },
+              { slot: 'evening', temp: -8, apparent: -12, code: 71, precip: 35 },
+            ],
+          },
+          {
+            temp: -4, tempMax: -4, tempMin: -9, apparentTemp: -8, weatherCode: 71, isDay: 1,
+            windSpeed: 15, windGusts: 23, humidity: 80, precipProb: 60,
+            slices: [
+              { slot: 'morning', temp: -8, apparent: -12, code: 71, precip: 55 },
+              { slot: 'afternoon', temp: -4, apparent: -8, code: 71, precip: 60 },
+              { slot: 'evening', temp: -6, apparent: -10, code: 3, precip: 30 },
+            ],
+          },
+          {
+            temp: -5, tempMax: -5, tempMin: -10, apparentTemp: -9, weatherCode: 1, isDay: 1,
+            windSpeed: 11, windGusts: 17, humidity: 62, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: -9, apparent: -13, code: 1, precip: 5 },
+              { slot: 'afternoon', temp: -5, apparent: -9, code: 0, precip: 10 },
+              { slot: 'evening', temp: -8, apparent: -12, code: 1, precip: 5 },
+            ],
+          },
+        ]),
+      },
+      {
+        id: 'rain',
+        days: buildSimulatedWeek([
+          {
+            temp: 6, tempMax: 7, tempMin: 4, apparentTemp: 2, weatherCode: 63, isDay: 1,
+            windSpeed: 20, windGusts: 31, humidity: 91, precipProb: 85,
+            slices: [
+              { slot: 'morning', temp: 5, apparent: 1, code: 61, precip: 80 },
+              { slot: 'afternoon', temp: 7, apparent: 3, code: 63, precip: 85 },
+              { slot: 'evening', temp: 5, apparent: 2, code: 51, precip: 65 },
+            ],
+          },
+          {
+            temp: 8, tempMax: 8, tempMin: 5, apparentTemp: 4, weatherCode: 80, isDay: 1,
+            windSpeed: 23, windGusts: 35, humidity: 88, precipProb: 80,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 2, code: 61, precip: 70 },
+              { slot: 'afternoon', temp: 8, apparent: 4, code: 80, precip: 80 },
+              { slot: 'evening', temp: 6, apparent: 2, code: 61, precip: 60 },
+            ],
+          },
+          {
+            temp: 9, tempMax: 9, tempMin: 5, apparentTemp: 6, weatherCode: 3, isDay: 1,
+            windSpeed: 16, windGusts: 24, humidity: 82, precipProb: 35,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 3, code: 45, precip: 30 },
+              { slot: 'afternoon', temp: 9, apparent: 6, code: 3, precip: 35 },
+              { slot: 'evening', temp: 7, apparent: 4, code: 51, precip: 45 },
+            ],
+          },
+          {
+            temp: 7, tempMax: 7, tempMin: 3, apparentTemp: 3, weatherCode: 65, isDay: 1,
+            windSpeed: 25, windGusts: 38, humidity: 94, precipProb: 90,
+            slices: [
+              { slot: 'morning', temp: 5, apparent: 1, code: 63, precip: 85 },
+              { slot: 'afternoon', temp: 7, apparent: 3, code: 65, precip: 90 },
+              { slot: 'evening', temp: 4, apparent: 0, code: 61, precip: 75 },
+            ],
+          },
+          {
+            temp: 10, tempMax: 10, tempMin: 5, apparentTemp: 8, weatherCode: 2, isDay: 1,
+            windSpeed: 13, windGusts: 20, humidity: 74, precipProb: 20,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 4, code: 2, precip: 15 },
+              { slot: 'afternoon', temp: 10, apparent: 8, code: 1, precip: 20 },
+              { slot: 'evening', temp: 7, apparent: 5, code: 2, precip: 15 },
+            ],
+          },
+          {
+            temp: 11, tempMax: 11, tempMin: 6, apparentTemp: 9, weatherCode: 51, isDay: 1,
+            windSpeed: 17, windGusts: 26, humidity: 85, precipProb: 55,
+            slices: [
+              { slot: 'morning', temp: 7, apparent: 5, code: 3, precip: 40 },
+              { slot: 'afternoon', temp: 11, apparent: 9, code: 51, precip: 55 },
+              { slot: 'evening', temp: 8, apparent: 6, code: 3, precip: 30 },
+            ],
+          },
+          {
+            temp: 12, tempMax: 12, tempMin: 6, apparentTemp: 10, weatherCode: 1, isDay: 1,
+            windSpeed: 12, windGusts: 18, humidity: 68, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 7, apparent: 5, code: 1, precip: 10 },
+              { slot: 'afternoon', temp: 12, apparent: 10, code: 1, precip: 10 },
+              { slot: 'evening', temp: 8, apparent: 6, code: 2, precip: 10 },
+            ],
+          },
+        ]),
+      },
+      {
+        id: 'swing',
+        days: buildSimulatedWeek([
+          {
+            temp: 15, tempMax: 18, tempMin: 5, apparentTemp: 14, weatherCode: 2, isDay: 1,
+            windSpeed: 11, windGusts: 18, humidity: 52, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 5, apparent: 3, code: 1, precip: 5 },
+              { slot: 'afternoon', temp: 18, apparent: 17, code: 0, precip: 10 },
+              { slot: 'evening', temp: 9, apparent: 7, code: 2, precip: 10 },
+            ],
+          },
+          {
+            temp: 19, tempMax: 19, tempMin: 6, apparentTemp: 18, weatherCode: 0, isDay: 1,
+            windSpeed: 10, windGusts: 16, humidity: 48, precipProb: 5,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 4, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 19, apparent: 18, code: 0, precip: 5 },
+              { slot: 'evening', temp: 11, apparent: 9, code: 1, precip: 5 },
+            ],
+          },
+          {
+            temp: 17, tempMax: 17, tempMin: 7, apparentTemp: 16, weatherCode: 2, isDay: 1,
+            windSpeed: 14, windGusts: 22, humidity: 55, precipProb: 20,
+            slices: [
+              { slot: 'morning', temp: 7, apparent: 5, code: 2, precip: 10 },
+              { slot: 'afternoon', temp: 17, apparent: 16, code: 2, precip: 20 },
+              { slot: 'evening', temp: 10, apparent: 8, code: 2, precip: 15 },
+            ],
+          },
+          {
+            temp: 13, tempMax: 13, tempMin: 5, apparentTemp: 11, weatherCode: 80, isDay: 1,
+            windSpeed: 18, windGusts: 28, humidity: 72, precipProb: 50,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 3, code: 3, precip: 35 },
+              { slot: 'afternoon', temp: 13, apparent: 11, code: 80, precip: 50 },
+              { slot: 'evening', temp: 8, apparent: 5, code: 2, precip: 20 },
+            ],
+          },
+          {
+            temp: 16, tempMax: 16, tempMin: 4, apparentTemp: 15, weatherCode: 1, isDay: 1,
+            windSpeed: 9, windGusts: 15, humidity: 50, precipProb: 5,
+            slices: [
+              { slot: 'morning', temp: 4, apparent: 2, code: 1, precip: 5 },
+              { slot: 'afternoon', temp: 16, apparent: 15, code: 0, precip: 5 },
+              { slot: 'evening', temp: 9, apparent: 7, code: 1, precip: 5 },
+            ],
+          },
+          {
+            temp: 20, tempMax: 20, tempMin: 8, apparentTemp: 19, weatherCode: 0, isDay: 1,
+            windSpeed: 11, windGusts: 17, humidity: 45, precipProb: 0,
+            slices: [
+              { slot: 'morning', temp: 8, apparent: 7, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 20, apparent: 19, code: 0, precip: 0 },
+              { slot: 'evening', temp: 13, apparent: 12, code: 0, precip: 0 },
+            ],
+          },
+          {
+            temp: 21, tempMax: 21, tempMin: 9, apparentTemp: 20, weatherCode: 1, isDay: 1,
+            windSpeed: 12, windGusts: 19, humidity: 47, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 9, apparent: 8, code: 1, precip: 5 },
+              { slot: 'afternoon', temp: 21, apparent: 20, code: 1, precip: 10 },
+              { slot: 'evening', temp: 14, apparent: 13, code: 2, precip: 10 },
+            ],
+          },
+        ]),
+      },
+      {
+        id: 'heat',
+        days: buildSimulatedWeek([
+          {
+            temp: 29, tempMax: 30, tempMin: 20, apparentTemp: 30, weatherCode: 0, isDay: 1,
+            windSpeed: 9, windGusts: 14, humidity: 42, precipProb: 0,
+            slices: [
+              { slot: 'morning', temp: 21, apparent: 21, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 30, apparent: 31, code: 0, precip: 0 },
+              { slot: 'evening', temp: 24, apparent: 24, code: 0, precip: 5 },
+            ],
+          },
+          {
+            temp: 31, tempMax: 31, tempMin: 21, apparentTemp: 32, weatherCode: 0, isDay: 1,
+            windSpeed: 8, windGusts: 13, humidity: 38, precipProb: 0,
+            slices: [
+              { slot: 'morning', temp: 22, apparent: 22, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 31, apparent: 32, code: 0, precip: 0 },
+              { slot: 'evening', temp: 25, apparent: 25, code: 0, precip: 0 },
+            ],
+          },
+          {
+            temp: 32, tempMax: 32, tempMin: 22, apparentTemp: 33, weatherCode: 1, isDay: 1,
+            windSpeed: 10, windGusts: 16, humidity: 40, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 23, apparent: 23, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 32, apparent: 33, code: 1, precip: 10 },
+              { slot: 'evening', temp: 26, apparent: 26, code: 1, precip: 10 },
+            ],
+          },
+          {
+            temp: 28, tempMax: 28, tempMin: 19, apparentTemp: 29, weatherCode: 95, isDay: 1,
+            windSpeed: 18, windGusts: 32, humidity: 64, precipProb: 65,
+            slices: [
+              { slot: 'morning', temp: 21, apparent: 21, code: 1, precip: 15 },
+              { slot: 'afternoon', temp: 28, apparent: 29, code: 2, precip: 35 },
+              { slot: 'evening', temp: 22, apparent: 22, code: 95, precip: 65 },
+            ],
+          },
+          {
+            temp: 26, tempMax: 26, tempMin: 18, apparentTemp: 26, weatherCode: 1, isDay: 1,
+            windSpeed: 12, windGusts: 19, humidity: 48, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 19, apparent: 19, code: 1, precip: 5 },
+              { slot: 'afternoon', temp: 26, apparent: 26, code: 0, precip: 10 },
+              { slot: 'evening', temp: 21, apparent: 21, code: 0, precip: 5 },
+            ],
+          },
+          {
+            temp: 29, tempMax: 29, tempMin: 19, apparentTemp: 30, weatherCode: 0, isDay: 1,
+            windSpeed: 9, windGusts: 14, humidity: 43, precipProb: 0,
+            slices: [
+              { slot: 'morning', temp: 20, apparent: 20, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 29, apparent: 30, code: 0, precip: 0 },
+              { slot: 'evening', temp: 23, apparent: 23, code: 0, precip: 0 },
+            ],
+          },
+          {
+            temp: 30, tempMax: 30, tempMin: 20, apparentTemp: 31, weatherCode: 0, isDay: 1,
+            windSpeed: 10, windGusts: 15, humidity: 41, precipProb: 5,
+            slices: [
+              { slot: 'morning', temp: 21, apparent: 21, code: 0, precip: 0 },
+              { slot: 'afternoon', temp: 30, apparent: 31, code: 0, precip: 5 },
+              { slot: 'evening', temp: 24, apparent: 24, code: 0, precip: 5 },
+            ],
+          },
+        ]),
+      },
+    ];
+
+    // Глобальное состояние приложения
+    let state = {
+      lang: 'ru',           // 'ru' | 'en'
+      city: { name: 'Кишинёв', country: 'Молдова', names: { ru: 'Кишинёв', en: 'Chișinău' }, countries: { ru: 'Молдова', en: 'Moldova' }, lat: 47.0056, lon: 28.8575 },
+      style: 'casual',      // 'casual' | 'smart'
+      thermal: 'normal',    // 'cold' (-3) | 'normal' (0) | 'hot' (+3)
+      transport: 'walk',    // 'walk' | 'car'
+      simulatorId: 'live',  // 'live' | 'frost' | 'rain' | 'swing' | 'heat'
+      selectedDayIndex: 0,  // 0 = Сегодня, 1 = Завтра, 2..6 = дни недели
+      liveDays: [],         // Массив из 7 дней прогноза
+      isOfflineFallback: false,
+      lastGeneratedSummary: '',
+    };
+
+    // Загружаем сохранённые настройки из localStorage
+    function loadSavedState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('what_to_wear_state_v1');
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (['ru', 'en'].includes(parsed.lang)) {
+          state.lang = parsed.lang;
+        }
+        if (parsed.city && typeof parsed.city.lat === 'number') {
+          state.city = parsed.city;
+        }
+        if (['casual', 'smart'].includes(parsed.style)) {
+          state.style = parsed.style;
+        }
+        if (['cold', 'normal', 'hot'].includes(parsed.thermal)) {
+          state.thermal = parsed.thermal;
+        }
+        if (['walk', 'car'].includes(parsed.transport)) {
+          state.transport = parsed.transport;
+        }
+      } catch (err) {
+        console.warn('Не удалось прочитать настройки из localStorage:', err);
+      }
+    }
+
+    // Сохраняем настройки в localStorage
+    function saveState() {
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            lang: state.lang,
+            city: state.city,
+            style: state.style,
+            thermal: state.thermal,
+            transport: state.transport,
+          })
+        );
+      } catch (err) {
+        console.warn('Не удалось сохранить настройки:', err);
+      }
+    }
+
+    /**
+     * ============================================================================
+     * ГЕНЕРАТОРЫ КАСТОМНЫХ SVG-ИКОНОК ПОГОДЫ И ГАРДЕРОБА
+     * ============================================================================
+     */
+    function getWeatherSVG(code, isDay = 1, sizeClass = 'w-12 h-12') {
+      const isSnow = (code >= 71 && code <= 77) || code === 85 || code === 86;
+      const isThunder = code >= 95 && code <= 99;
+      const isRain =
+        (code >= 51 && code <= 67) || (code >= 80 && code <= 82);
+      const isFog = code === 45 || code === 48;
+
+      // Гроза
+      if (isThunder) {
+        return `
+          <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 42h27a11 11 0 0 0 1.4-21.9A15 15 0 0 0 18.2 17 12.5 12.5 0 0 0 19 42Z" fill="#64748B" stroke="#CBD5E1" stroke-width="2"/>
+            <path d="M33 34l-6 11h7l-3 11 11-13h-7l3-9h-5Z" fill="#FACC15" stroke="#FEF08A" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M20 47l-2 6M44 47l-2 6" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        `;
+      }
+
+      // Снег
+      if (isSnow) {
+        return `
+          <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 40h27a11 11 0 0 0 1.4-21.9A15 15 0 0 0 18.2 15 12.5 12.5 0 0 0 19 40Z" fill="#E2E8F0" stroke="#FFFFFF" stroke-width="2"/>
+            <g stroke="#BAE6FD" stroke-width="2.2" stroke-linecap="round">
+              <path d="M23 46v8M19.5 48l7 4M26.5 48l-7 4"/>
+              <path d="M34 49v8M30.5 51l7 4M37.5 51l-7 4"/>
+              <path d="M44 46v8M40.5 48l7 4M47.5 48l-7 4"/>
+            </g>
+          </svg>
+        `;
+      }
+
+      // Дождь / морось
+      if (isRain) {
+        return `
+          <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 40h27a11 11 0 0 0 1.4-21.9A15 15 0 0 0 18.2 15 12.5 12.5 0 0 0 19 40Z" fill="#94A3B8" stroke="#E2E8F0" stroke-width="2"/>
+            <g stroke="#38BDF8" stroke-width="2.8" stroke-linecap="round">
+              <path d="M23 45l-3 8"/>
+              <path d="M33 45l-3 10"/>
+              <path d="M43 45l-3 8"/>
+            </g>
+          </svg>
+        `;
+      }
+
+      // Ясно или преимущественно ясно
+      if (code === 0 || code === 1) {
+        if (isDay) {
+          return `
+            <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="32" r="14" fill="#FBBF24" stroke="#FEF08A" stroke-width="2"/>
+              <g stroke="#FDE047" stroke-width="3" stroke-linecap="round">
+                <path d="M32 7v6M32 51v6M7 32h6M51 32h6M14.3 14.3l4.2 4.2M45.5 45.5l4.2 4.2M49.7 14.3l-4.2 4.2M18.5 45.5l-4.2 4.2"/>
+              </g>
+            </svg>
+          `;
+        }
+        return `
+          <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42.5 41.5A17 17 0 0 1 22.5 17.5a17 17 0 1 0 24 24c-1.3.1-2.6 0-4 0Z" fill="#E0E7FF" stroke="#C7D2FE" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="45" cy="18" r="2" fill="#FDE047"/>
+            <circle cx="51" cy="26" r="1.5" fill="#BAE6FD"/>
+          </svg>
+        `;
+      }
+
+      // Переменная облачность (код 2)
+      if (code === 2) {
+        if (isDay) {
+          return `
+            <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="10" fill="#FBBF24" stroke="#FEF08A" stroke-width="1.8"/>
+              <g stroke="#FDE047" stroke-width="2.4" stroke-linecap="round">
+                <path d="M24 8v3M10 24h3M13.5 13.5l2.2 2.2M34.5 13.5l-2.2 2.2"/>
+              </g>
+              <path d="M22 46h25a9.5 9.5 0 0 0 1.2-18.9A13 13 0 0 0 23 24.5 10.5 10.5 0 0 0 22 46Z" fill="#F1F5F9" stroke="#FFFFFF" stroke-width="2"/>
+            </svg>
+          `;
+        }
+        return `
+          <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M31 28a11 11 0 0 1-11-11c0-2 .5-3.9 1.5-5.5A11 11 0 1 0 36.5 26.5c-1.7 1-3.5 1.5-5.5 1.5Z" fill="#C7D2FE"/>
+            <path d="M22 47h25a9.5 9.5 0 0 0 1.2-18.9A13 13 0 0 0 23 25.5 10.5 10.5 0 0 0 22 47Z" fill="#CBD5E1" stroke="#F8FAFC" stroke-width="2"/>
+          </svg>
+        `;
+      }
+
+      // Туман (45, 48)
+      if (isFog) {
+        return `
+          <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 36h27a10 10 0 0 0 1.2-19.9A14 14 0 0 0 19.5 14 11.5 11.5 0 0 0 19 36Z" fill="#CBD5E1" stroke="#F1F5F9" stroke-width="2"/>
+            <g stroke="#94A3B8" stroke-width="2.6" stroke-linecap="round">
+              <path d="M14 43h36"/>
+              <path d="M18 49h28"/>
+            </g>
+          </svg>
+        `;
+      }
+
+      // Пасмурно (код 3 и прочие)
+      return `
+        <svg class="${sizeClass}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 44h27a11 11 0 0 0 1.4-21.9A15 15 0 0 0 18.2 19 12.5 12.5 0 0 0 19 44Z" fill="#CBD5E1" stroke="#FFFFFF" stroke-width="2"/>
+        </svg>
+      `;
+    }
+
+    function getWardrobeIconSVG(type, variant = 'default') {
+      if (type === 'top') {
+        return `
+          <svg class="w-5 h-5 text-indigo-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+          </svg>
+        `;
+      }
+
+      if (type === 'outerwear') {
+        if (variant === 'none') {
+          return `
+            <svg class="w-5 h-5 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+            </svg>
+          `;
+        }
+        return `
+          <svg class="w-5 h-5 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h2.5a2 2 0 0 1 1.9 1.4l1.6 5.2a1 1 0 0 1-.95 1.4H18v9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-9H3.95a1 1 0 0 1-.95-1.4l1.6-5.2A2 2 0 0 1 6.5 3H9"/>
+            <path d="M9 3l3 4 3-4"/>
+            <path d="M12 7v14"/>
+          </svg>
+        `;
+      }
+
+      if (type === 'bottom') {
+        return `
+          <svg class="w-5 h-5 text-cyan-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3h12l1.5 18h-4.5l-3-11-3 11H4.5L6 3z"/>
+            <path d="M6 7h12"/>
+          </svg>
+        `;
+      }
+
+      // shoes
+      return `
+        <svg class="w-5 h-5 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 16.5V19a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-1.5a2.5 2.5 0 0 0-2.1-2.47l-4.4-.73-2.8-3.8a1 1 0 0 0-.8-.4H8.5a1 1 0 0 0-.95.68L6 15H4.5A1.5 1.5 0 0 0 3 16.5z"/>
+          <path d="M3 17.5h18"/>
+        </svg>
+      `;
+    }
+
+    // Расшифровка WMO кода погоды на активном языке (RU / EN)
+    function describeWeatherCode(code) {
+      const codes = t().weatherCodes;
+      return codes[code] || codes.fallback;
+    }
+
+    /**
+     * ============================================================================
+     * УМНЫЙ АЛГОРИТМ ПОДБОРА ГАРДЕРОБА И ВЕРДИКТА (RU / EN)
+     * ============================================================================
+     */
+    function generateOutfitRecommendation(weather, dayIndex = 0) {
+      const isEn = state.lang === 'en';
+      const isSmart = state.style === 'smart';
+      const isCar = state.transport === 'car';
+      const isFutureDay = dayIndex > 0;
+
+      // Поправка на теплоощущение пользователя
+      const thermalShift = state.thermal === 'cold' ? -3 : state.thermal === 'hot' ? 3 : 0;
+
+      // Поправка на сильный ветер (если порывы >= 30 км/ч или ветер >= 22 км/ч)
+      const isWindy = weather.windGusts >= 30 || weather.windSpeed >= 22;
+      const windPenalty = isWindy ? -2.5 : 0;
+
+      // Осадки: дождь или снег
+      const code = weather.weatherCode;
+      const isSnowCode = (code >= 71 && code <= 77) || code === 85 || code === 86;
+      const isRainCode =
+        (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
+      const highPrecipProb = weather.precipProb >= 40;
+      const hasRain = !isSnowCode && (isRainCode || (highPrecipProb && weather.temp > 1));
+      const hasSnow = isSnowCode || (highPrecipProb && weather.temp <= 1);
+
+      // Перепад температур между утром, днём и вечером
+      const sliceTemps = weather.slices.map((s) => s.temp);
+      const minSliceTemp = Math.min(...sliceTemps, weather.tempMin ?? weather.temp);
+      const maxSliceTemp = Math.max(...sliceTemps, weather.tempMax ?? weather.temp);
+      const tempSwing = Math.round(maxSliceTemp - minSliceTemp);
+      const hasBigSwing = tempSwing >= 7;
+
+      // Для будущих дней учитываем баланс между дневным пиком и утренней/вечерней прохладой
+      const avgSliceApparent =
+        weather.slices.reduce((acc, s) => acc + s.apparent, 0) / weather.slices.length;
+      const baseApparent = isFutureDay
+        ? Math.round(weather.apparentTemp * 0.65 + avgSliceApparent * 0.35)
+        : weather.apparentTemp;
+
+      // Базовая ощущаемая температура с учётом личного профиля и ветра
+      const effectiveTemp = Math.round(baseApparent + thermalShift + windPenalty);
+
+      // Для верхней одежды водителям на машине нужно чуть меньше утепления (+3.5°C)
+      const outerwearTemp = isCar ? effectiveTemp + 3.5 : effectiveTemp;
+
+      let outerwear = { title: '', detail: '', variant: 'default' };
+      let baseTop = { title: '', detail: '' };
+      let bottom = { title: '', detail: '' };
+      let shoes = { title: '', detail: '' };
+      const accessories = [];
+
+      // 1. ПОДБОР ВЕРХНЕЙ ОДЕЖДЫ (по outerwearTemp)
+      if (outerwearTemp <= -7) {
+        if (isEn) {
+          outerwear = isSmart
+            ? {
+                title: isCar ? 'Cropped wool coat or insulated parka' : 'Full-length heavy parka or winter coat',
+                detail: isCar
+                  ? 'Easy to drive in while keeping solid insulation for quick walks outside.'
+                  : 'Maximum protection against freezing air and wind, ideally with a high collar.',
+              }
+            : {
+                title: isCar ? 'Short down puffer jacket' : 'Heavy insulated parka or down coat',
+                detail: isCar
+                  ? 'Unrestrictive behind the wheel and warms up fast when stepping outside.'
+                  : 'Mid-thigh insulated down jacket with a storm hood.',
+              };
+        } else {
+          outerwear = isSmart
+            ? {
+                title: isCar ? 'Укороченное шерстяное пальто или парка' : 'Длинная тёплая парка или пуховик',
+                detail: isCar
+                  ? 'Удобная длина для руля, но с плотным утеплителем на случай выхода из авто.'
+                  : 'Максимум защиты от мороза и ветра, желательно с высоким воротником.',
+              }
+            : {
+                title: isCar ? 'Короткий зимний пуховик' : 'Тёплый объёмный пуховик или аляска',
+                detail: isCar
+                  ? 'Не сковывает движения за рулём и быстро согревает на парковке.'
+                  : 'Надёжный пуховик до середины бедра с капюшоном.',
+              };
+        }
+      } else if (outerwearTemp <= 2) {
+        if (isEn) {
+          outerwear = isSmart
+            ? {
+                title: isCar ? 'Insulated peacoat or quilted jacket' : 'Insulated wool overcoat',
+                detail: 'Holds a sharp silhouette, blocks chilly gusts, and looks polished in the city.',
+              }
+            : {
+                title: isCar ? 'Quilted jacket or insulated bomber' : 'Mid-weight puffer or lined parka',
+                detail: isWindy
+                  ? 'Go for a storm-flap front and an adjustable hood to block gusts.'
+                  : 'Balanced warmth without overheating indoors or on transit.',
+              };
+        } else {
+          outerwear = isSmart
+            ? {
+                title: isCar ? 'Утеплённый бушлат или стёганая куртка' : 'Шерстяное пальто на утеплителе',
+                detail: 'Держит форму, защищает от продувания и отлично смотрится в городе.',
+              }
+            : {
+                title: isCar ? 'Стёганая куртка или утеплённый бомбер' : 'Демисезонный пуховик или парка',
+                detail: isWindy
+                  ? 'Выбирай модель с ветрозащитной планкой и капюшоном.'
+                  : 'Оптимальный баланс тепла без эффекта сауны в транспорте.',
+              };
+        }
+      } else if (outerwearTemp <= 10) {
+        if (isEn) {
+          outerwear = isSmart
+            ? {
+                title: hasRain ? 'Water-repellent trench or mac coat' : 'Classic wool coat or trench',
+                detail: hasRain
+                  ? 'Weather-resistant fabric shields against drizzle while keeping a sharp look.'
+                  : 'Layers effortlessly over knitwear or a tailored blazer.',
+              }
+            : {
+                title: hasRain ? 'Waterproof shell parka or rain jacket' : 'Lined windbreaker, bomber, or leather jacket',
+                detail: isWindy
+                  ? 'A dense outer shell keeps brisk gusts out.'
+                  : 'Lightweight jacket that moves comfortably with you all day.',
+              };
+        } else {
+          outerwear = isSmart
+            ? {
+                title: hasRain ? 'Плотный тренч или макинтош' : 'Классическое пальто или тренч',
+                detail: hasRain
+                  ? 'Водоотталкивающая ткань спасёт от мороси и сохранит деловой вид.'
+                  : 'Идеально ложится поверх трикотажа или пиджака.',
+              }
+            : {
+                title: hasRain ? 'Непромокаемая парка или мембранная куртка' : 'Утеплённая ветровка, бомбер или косуха',
+                detail: isWindy
+                  ? 'Плотный верх закроет от порывов ветра.'
+                  : 'Лёгкая куртка, в которой комфортно двигаться весь день.',
+              };
+        }
+      } else if (outerwearTemp <= 17) {
+        if (isEn) {
+          outerwear = isSmart
+            ? {
+                title: hasRain ? 'Lightweight mac or trench coat' : 'Blazer, cardigan, or light trench',
+                detail: 'Wear it open during the warm afternoon and button up toward evening.',
+              }
+            : {
+                title: hasRain ? 'Packable rain shell or anorak' : 'Denim jacket, overshirt, or light windbreaker',
+                detail: hasBigSwing
+                  ? 'Easy to take off midday and throw back on in the evening.'
+                  : 'Featherlight outer layer for a breezy walk.',
+              };
+        } else {
+          outerwear = isSmart
+            ? {
+                title: hasRain ? 'Лёгкий плащ или тренч' : 'Блейзер, кардиган или лёгкий тренч',
+                detail: 'Можно носить нараспашку днём и застегнуть ближе к вечеру.',
+              }
+            : {
+                title: hasRain ? 'Лёгкий дождевик или анорак' : 'Джинсовка, овершот или лёгкая ветровка',
+                detail: hasBigSwing
+                  ? 'Днём можно снять, а утром и вечером накинуть поверх футболки.'
+                  : 'Невесомый верхний слой для комфортной прогулки.',
+              };
+        }
+      } else {
+        if (isEn) {
+          outerwear = {
+            title: hasRain ? 'Compact packable rain shell in your bag' : 'No outerwear needed',
+            detail: hasRain
+              ? 'Warm outside, but toss a lightweight rain shell in your bag just in case.'
+              : 'Warm enough to step out in a single breathable top layer.',
+            variant: hasRain ? 'default' : 'none',
+          };
+        } else {
+          outerwear = {
+            title: hasRain ? 'Тонкий складной дождевик с собой' : 'Без верхней одежды',
+            detail: hasRain
+              ? 'На улице тепло, но на случай ливня лучше бросить в сумку компактный плащ.'
+              : 'Погода позволяет обойтись одним лёгким верхним слоем.',
+            variant: hasRain ? 'default' : 'none',
+          };
+        }
+      }
+
+      // 2. ПОДБОР БАЗОВОГО ВЕРХА И СЛОЁВ (по effectiveTemp)
+      if (effectiveTemp <= -5) {
+        if (isEn) {
+          baseTop = isSmart
+            ? {
+                title: 'Thermal base top + merino sweater or turtleneck',
+                detail: 'Two-layer upper insulation locks in warmth during cold waits outside.',
+              }
+            : {
+                title: 'Thermal tee + heavy fleece hoodie',
+                detail: 'Smart layering traps heat far better than a single bulky sweater.',
+              };
+        } else {
+          baseTop = isSmart
+            ? {
+                title: 'Термолонгслив + шерстяной свитер или водолазка',
+                detail: 'Двухслойный верх удерживает тепло даже при долгом ожидании на улице.',
+              }
+            : {
+                title: 'Термобельё / футболка + плотное худи на флисе',
+                detail: 'Многослойность работает лучше одного толстого свитера.',
+              };
+        }
+      } else if (effectiveTemp <= 4) {
+        if (isEn) {
+          baseTop = isSmart
+            ? {
+                title: 'Cashmere jumper, turtleneck, or shirt + gilet',
+                detail: 'Refined mid-layer that stays comfortable once you step indoors.',
+              }
+            : {
+                title: 'Crewneck tee + sweatshirt or hoodie',
+                detail: 'Cozy outdoors and effortless to peel off in a café or office.',
+              };
+        } else {
+          baseTop = isSmart
+            ? {
+                title: 'Кашемировый джемпер, водолазка или рубашка + жилет',
+                detail: 'Аккуратный тёплый слой, в котором не жарко в помещении.',
+              }
+            : {
+                title: 'Футболка + свитшот или худи',
+                detail: 'Классическая связка: уютно на улице и удобно снять кофту в кафе или офисе.',
+              };
+        }
+      } else if (effectiveTemp <= 13) {
+        if (isEn) {
+          baseTop = isSmart
+            ? {
+                title: 'Oxford button-down or long-sleeve knit polo',
+                detail: hasBigSwing
+                  ? 'Drape a fine-knit sweater over your shoulders for the cooler evening.'
+                  : 'Breathable, structured layer suited for mild weather.',
+              }
+            : {
+                title: hasBigSwing ? 'T-shirt + light sweatshirt or zip hoodie' : 'Long-sleeve tee or tee under an open shirt',
+                detail: 'Flexible layering so you can adapt quickly between sun and shade.',
+              };
+        } else {
+          baseTop = isSmart
+            ? {
+                title: 'Рубашка из оксфорда или трикотажное поло с длинным рукавом',
+                detail: hasBigSwing
+                  ? 'Добавь тонкий джемпер на плечи на случай вечерней прохлады.'
+                  : 'Дышащий слой для комфортной температуры.',
+              }
+            : {
+                title: hasBigSwing ? 'Футболка + лёгкий свитшот или худи' : 'Лонгслив или футболка под расстёгнутую рубашку',
+                detail: 'Гибкий вариант, чтобы легко подстраиваться под солнце и тень.',
+              };
+        }
+      } else if (effectiveTemp <= 21) {
+        if (isEn) {
+          baseTop = isSmart
+            ? {
+                title: 'Crisp cotton shirt or knit polo',
+                detail: 'Clean, put-together look tailored for mild sunny weather.',
+              }
+            : {
+                title: 'Essential heavyweight cotton t-shirt',
+                detail: hasBigSwing
+                  ? 'Keep a light sweatshirt or overshirt handy for after sunset.'
+                  : 'Breathable 180–220 gsm cotton keeps its shape all day.',
+              };
+        } else {
+          baseTop = isSmart
+            ? {
+                title: 'Хлопковая рубашка или трикотажное поло',
+                detail: 'Свежий и собранный образ для тёплой погоды.',
+              }
+            : {
+                title: 'Базовая хлопковая футболка',
+                detail: hasBigSwing
+                  ? 'Возьми с собой лёгкую толстовку или рубашку на вечер.'
+                  : 'Оптимальная плотность хлопка 180–220 г/м².',
+              };
+        }
+      } else {
+        if (isEn) {
+          baseTop = isSmart
+            ? {
+                title: 'Linen shirt or airy short-sleeve knit polo',
+                detail: 'Light tones and natural weaves prevent overheating.',
+              }
+            : {
+                title: 'Relaxed lightweight cotton or linen tee',
+                detail: 'Maximum airflow on a hot day.',
+              };
+        } else {
+          baseTop = isSmart
+            ? {
+                title: 'Льняная рубашка или лёгкое дышащее поло',
+                detail: 'Светлые оттенки и натуральные ткани спасут от перегрева.',
+              }
+            : {
+                title: 'Свободная футболка из лёгкого хлопка или льна',
+                detail: 'Максимальная вентиляция в жаркий день.',
+              };
+        }
+      }
+
+      // 3. ПОДБОР НИЗА
+      if (effectiveTemp <= -6) {
+        if (isEn) {
+          bottom = isSmart
+            ? {
+                title: 'Heavy wool or flannel trousers',
+                detail: isCar
+                  ? 'Comfortable inside the cabin while blocking wind when stepping out.'
+                  : 'Layer thin thermal leggings underneath for extended walks.',
+              }
+            : {
+                title: isCar ? 'Heavyweight raw denim jeans' : 'Fleece-lined jeans or thermal joggers',
+                detail: 'Shields knees and lower back from biting wind.',
+              };
+        } else {
+          bottom = isSmart
+            ? {
+                title: 'Плотные шерстяные брюки или фланель',
+                detail: isCar
+                  ? 'В салоне комфортно, а при выходе на мороз ткань не продувается.'
+                  : 'При долгой ходьбе лучше надеть под низ тонкие термокальсоны.',
+              }
+            : {
+                title: isCar ? 'Плотные джинсы из тяжёлого денима' : 'Утеплённые джинсы или джоггеры с начёсом',
+                detail: 'Защищают колени и поясницу от ледяного ветра.',
+              };
+        }
+      } else if (effectiveTemp <= 14) {
+        if (isEn) {
+          bottom = isSmart
+            ? {
+                title: 'Tailored chinos or straight-leg trousers',
+                detail: 'Versatile pairing under a trench, blazer, or overcoat.',
+              }
+            : {
+                title: 'Straight-leg jeans or sturdy cargo pants',
+                detail: 'Durable denim that shrugs off wind and light street splash.',
+              };
+        } else {
+          bottom = isSmart
+            ? {
+                title: 'Брюки чинос или классические прямые брюки',
+                detail: 'Универсальный вариант под пальто, тренч или блейзер.',
+              }
+            : {
+                title: 'Прямые джинсы или плотные карго',
+                detail: 'Практичный деним, которому не страшны ни ветер, ни мелкие брызги.',
+              };
+        }
+      } else if (effectiveTemp <= 22) {
+        if (isEn) {
+          bottom = isSmart
+            ? {
+                title: 'Lightweight chinos or tropical-wool trousers',
+                detail: 'Stays breathable even in direct afternoon sunshine.',
+              }
+            : {
+                title: 'Relaxed jeans or lightweight cotton trousers',
+                detail: 'Won’t overheat midday and still protects against evening breeze.',
+              };
+        } else {
+          bottom = isSmart
+            ? {
+                title: 'Лёгкие чиносы или брюки из тонкой шерсти / хлопка',
+                detail: 'Комфортно даже на активном дневном солнце.',
+              }
+            : {
+                title: 'Свободные джинсы или лёгкие хлопковые брюки',
+                detail: 'Не парят днём и защищают от вечерней прохлады.',
+              };
+        }
+      } else {
+        if (isEn) {
+          bottom = isSmart
+            ? {
+                title: 'Linen trousers or tailored bermuda shorts',
+                detail: 'Breezy, fluid fabric keeps you cool with every step.',
+              }
+            : {
+                title: 'Shorts or ultra-light relaxed trousers',
+                detail: 'Best pick for heat above +23°C.',
+              };
+        } else {
+          bottom = isSmart
+            ? {
+                title: 'Льняные брюки или строгие бермуды',
+                detail: 'Лёгкая струящаяся ткань даёт прохладу при каждом шаге.',
+              }
+            : {
+                title: 'Шорты или ультралёгкие брюки свободного кроя',
+                detail: 'Лучший выбор для жары выше +23°C.',
+              };
+        }
+      }
+
+      // 4. ПОДБОР ОБУВИ
+      if (hasSnow || effectiveTemp <= -3) {
+        if (isEn) {
+          shoes = isSmart
+            ? {
+                title: 'Insulated leather Chelsea boots with lug soles',
+                detail: 'Treat leather with a water-repellent spray before heading out.',
+              }
+            : {
+                title: 'Winter boots or insulated high-top sneakers',
+                detail: 'Thick outsoles insulate your feet from frozen pavement.',
+              };
+        } else {
+          shoes = isSmart
+            ? {
+                title: 'Утеплённые кожаные челси или ботинки на протекторе',
+                detail: 'Обработай кожу водоотталкивающей пропиткой перед выходом.',
+              }
+            : {
+                title: 'Зимние ботинки или утеплённые высокие кроссовки',
+                detail: 'Толстая подошва изолирует стопу от холодного асфальта.',
+              };
+        }
+      } else if (hasRain) {
+        if (isEn) {
+          shoes = isSmart
+            ? {
+                title: 'Leather Chelsea boots or rubber-soled derbies',
+                detail: 'Leave suede and canvas pairs at home today.',
+              }
+            : {
+                title: 'Leather sneakers or Gore-Tex trail shoes',
+                detail: 'Keeps your socks dry when navigating wet sidewalks and puddles.',
+              };
+        } else {
+          shoes = isSmart
+            ? {
+                title: 'Кожаные челси или дерби на резиновой подошве',
+                detail: 'Замшу и текстиль сегодня лучше оставить дома.',
+              }
+            : {
+                title: 'Кожаные кроссовки или ботинки с мембраной',
+                detail: 'Ноги останутся сухими, даже если придётся обходить лужи.',
+              };
+        }
+      } else if (effectiveTemp <= 13) {
+        if (isEn) {
+          shoes = isSmart
+            ? {
+                title: 'Chelsea boots, desert boots, or loafers with crew socks',
+                detail: 'Understated smart staple for dry transitional weather.',
+              }
+            : {
+                title: 'Leather or sturdy suede sneakers',
+                detail: 'Blocks cool breezes and pairs cleanly with any top layer.',
+              };
+        } else {
+          shoes = isSmart
+            ? {
+                title: 'Челси, дезерты или кожаные лоферы (с высокими носками)',
+                detail: 'Сдержанная классика для сухого межсезонья.',
+              }
+            : {
+                title: 'Кожаные или плотные замшевые кроссовки',
+                detail: 'Не продуваются на ветру и подходят под любой верх.',
+              };
+        }
+      } else if (effectiveTemp <= 22) {
+        if (isEn) {
+          shoes = isSmart
+            ? {
+                title: 'Loafers, monk straps, or minimalist leather sneakers',
+                detail: 'Effortless footwear for dry spring or autumn days.',
+              }
+            : {
+                title: 'Classic canvas sneakers or everyday runners',
+                detail: 'Light and cushioned for long walks around town.',
+              };
+        } else {
+          shoes = isSmart
+            ? {
+                title: 'Лоферы, монки или минималистичные кожаные кеды',
+                detail: 'Лёгкая пара для сухой весенне-осенней погоды.',
+              }
+            : {
+                title: 'Классические кеды или беговые кроссовки',
+                detail: 'Лёгкие и удобные для долгих прогулок по городу.',
+              };
+        }
+      } else {
+        if (isEn) {
+          shoes = isSmart
+            ? {
+                title: 'Suede loafers or woven espadrilles',
+                detail: 'Breathable elegance built for warm weather.',
+              }
+            : {
+                title: 'Mesh runners, lightweight canvas sneakers, or sandals',
+                detail: 'Maximum ventilation to keep your feet cool.',
+              };
+        } else {
+          shoes = isSmart
+            ? {
+                title: 'Замшевые лоферы или лёгкие эспадрильи',
+                detail: 'Дышащая обувь для жаркого дня.',
+              }
+            : {
+                title: 'Сетчатые кроссовки, лёгкие кеды или сандалии',
+                detail: 'Максимальный воздухообмен для стоп.',
+              };
+        }
+      }
+
+      // 5. АКСЕССУАРЫ И ДЕТАЛИ (динамические бейджи)
+      if (hasRain) {
+        accessories.push({
+          icon: '☂️',
+          text: isEn ? 'Compact umbrella' : 'Компактный зонт',
+          tone: 'bg-blue-500/25 text-blue-100 border-blue-400/35',
+        });
+        accessories.push({
+          icon: '💧',
+          text: isEn ? 'Waterproof footwear' : 'Водостойкая обувь',
+          tone: 'bg-cyan-500/20 text-cyan-100 border-cyan-400/30',
+        });
+      }
+      if (effectiveTemp <= 0 || hasSnow) {
+        accessories.push({
+          icon: '🧣',
+          text: isEn ? 'Warm scarf' : 'Тёплый шарф',
+          tone: 'bg-indigo-500/25 text-indigo-100 border-indigo-400/35',
+        });
+        accessories.push({
+          icon: '🧤',
+          text: isEn ? 'Gloves' : 'Перчатки',
+          tone: 'bg-violet-500/25 text-violet-100 border-violet-400/35',
+        });
+      } else if (effectiveTemp <= 6 && isWindy) {
+        accessories.push({
+          icon: '🧣',
+          text: isEn ? 'Light wind scarf' : 'Лёгкий шарф от ветра',
+          tone: 'bg-indigo-500/20 text-indigo-100 border-indigo-400/30',
+        });
+      }
+
+      if (effectiveTemp <= -2 && !isCar) {
+        accessories.push({
+          icon: '🧢',
+          text: isEn ? 'Warm beanie' : 'Шапка / бини',
+          tone: 'bg-sky-500/25 text-sky-100 border-sky-400/35',
+        });
+      }
+
+      if (hasBigSwing && effectiveTemp > 6) {
+        accessories.push({
+          icon: '🧥',
+          text: isEn ? 'Pack an extra layer' : 'Взять второй слой с собой',
+          tone: 'bg-amber-500/25 text-amber-100 border-amber-400/35',
+        });
+      }
+
+      if (isWindy) {
+        accessories.push({
+          icon: '💨',
+          text: isEn ? 'Windproof outer layer' : 'Непродуваемый верх',
+          tone: 'bg-teal-500/20 text-teal-100 border-teal-400/30',
+        });
+      }
+
+      if ((code === 0 || code === 1) && weather.isDay && weather.temp >= 12) {
+        accessories.push({
+          icon: '🕶️',
+          text: isEn ? 'Sunglasses' : 'Солнцезащитные очки',
+          tone: 'bg-amber-400/25 text-amber-100 border-amber-300/35',
+        });
+      }
+
+      if (accessories.length === 0) {
+        accessories.push({
+          icon: '✨',
+          text: isEn ? 'Travel light — nothing extra needed' : 'Ничего лишнего — налегке',
+          tone: 'bg-emerald-500/20 text-emerald-100 border-emerald-400/30',
+        });
+      }
+
+      // 6. ЖИВОЙ ЧЕЛОВЕЧЕСКИЙ ВЕРДИКТ (2–3 предложения)
+      const verdictSentences = [];
+      const dayPrefix = isEn
+        ? dayIndex === 0
+          ? 'Today'
+          : dayIndex === 1
+          ? 'Tomorrow'
+          : 'On this day'
+        : dayIndex === 0
+        ? 'Сегодня'
+        : dayIndex === 1
+        ? 'Завтра'
+        : 'В этот день';
+
+      // Первое предложение — оценка ощущений на улице
+      if (isEn) {
+        if (effectiveTemp <= -7) {
+          verdictSentences.push(
+            `${dayPrefix} brings biting cold (feels like ${effectiveTemp}°C)${isWindy ? ', with gusty winds amplifying the chill' : ''}.`
+          );
+        } else if (effectiveTemp <= 3) {
+          verdictSentences.push(
+            `${dayPrefix} will feel crisp and chilly — around ${effectiveTemp}°C${hasRain ? ' with damp, raw air' : ''}.`
+          );
+        } else if (effectiveTemp <= 13) {
+          verdictSentences.push(
+            `${dayPrefix} is classic transitional weather: it feels like ${effectiveTemp}°C${isWindy ? ', with a noticeable breeze' : ''}.`
+          );
+        } else if (effectiveTemp <= 21) {
+          verdictSentences.push(
+            `${dayPrefix} offers a comfortable ${effectiveTemp}°C feels-like sweet spot — neither too warm nor chilly.`
+          );
+        } else {
+          verdictSentences.push(
+            `${dayPrefix} brings summer warmth (feels like ${effectiveTemp}°C) — keep your outfit light and breathable.`
+          );
+        }
+
+        if (hasBigSwing) {
+          verdictSentences.push(
+            `Watch for a wide temperature swing (from ${formatTemp(minSliceTemp)}C to ${formatTemp(maxSliceTemp)}C): dress in removable layers so you stay comfortable from morning to night.`
+          );
+        } else if (hasRain) {
+          verdictSentences.push(
+            `There is a high chance of rain (${weather.precipProb}%), so opt for water-resistant shoes and bring an umbrella or hood.`
+          );
+        } else if (hasSnow) {
+          verdictSentences.push(
+            `Snow is in the forecast — prioritize grippy soles and keep your neck covered.`
+          );
+        } else if (isWindy) {
+          verdictSentences.push(
+            `With wind gusts up to ${weather.windGusts} km/h, make sure your outer layer blocks the wind.`
+          );
+        }
+
+        if (isCar) {
+          verdictSentences.push(
+            `Since you're driving, we dialed back the outerwear weight so you won't overheat in the cabin while staying warm on short walks.`
+          );
+        } else if (isSmart) {
+          verdictSentences.push(
+            `Curated in a smart-casual aesthetic so your layers pair effortlessly for meetings or office hours.`
+          );
+        } else {
+          verdictSentences.push(
+            `Built for walking comfortably around town with unrestricted movement and all-day thermal balance.`
+          );
+        }
+      } else {
+        if (effectiveTemp <= -7) {
+          verdictSentences.push(
+            `${dayPrefix} по-настоящему морозно (ощущается как ${effectiveTemp}°C)${isWindy ? ', а порывистый ветер усиливает холод' : ''}.`
+          );
+        } else if (effectiveTemp <= 3) {
+          verdictSentences.push(
+            `${dayPrefix} прохладно и свежо — по ощущениям около ${effectiveTemp}°C${hasRain ? ' с промозглой сыростью' : ''}.`
+          );
+        } else if (effectiveTemp <= 13) {
+          verdictSentences.push(
+            `${dayPrefix} типичное межсезонье: ощущается как ${effectiveTemp}°C${isWindy ? ', ветер добавляет прохлады' : ''}.`
+          );
+        } else if (effectiveTemp <= 21) {
+          verdictSentences.push(
+            `${dayPrefix} ожидаются комфортные ${effectiveTemp}°C по ощущениям — идеальный баланс, когда не жарко и не холодно.`
+          );
+        } else {
+          verdictSentences.push(
+            `${dayPrefix} будет по-летнему тепло (ощущается как ${effectiveTemp}°C) — планируй максимально лёгкий образ.`
+          );
+        }
+
+        if (hasBigSwing) {
+          verdictSentences.push(
+            `Учти заметный перепад за день (от ${minSliceTemp > 0 ? '+' + minSliceTemp : minSliceTemp}°C до ${maxSliceTemp > 0 ? '+' + maxSliceTemp : maxSliceTemp}°C): одевайся слоями, чтобы днём снять лишнее, а вечером не замёрзнуть.`
+          );
+        } else if (hasRain) {
+          verdictSentences.push(
+            `Высока вероятность дождя (${weather.precipProb}%), поэтому выбирай непромокаемую обувь и не забудь зонт или капюшон.`
+          );
+        } else if (hasSnow) {
+          verdictSentences.push(
+            `Ожидается снег, так что делай ставку на нескользящую подошву и закрытую шею.`
+          );
+        } else if (isWindy) {
+          verdictSentences.push(
+            `Ветер с порывами до ${weather.windGusts} км/ч — верхний слой обязательно должен быть плотным и непродуваемым.`
+          );
+        }
+
+        if (isCar) {
+          verdictSentences.push(
+            `Поскольку ты на машине, верхнюю одежду облегчили — в салоне не придётся париться, а для коротких перебежек тепла хватит.`
+          );
+        } else if (isSmart) {
+          verdictSentences.push(
+            `Образ собран в эстетике смарт-кэжуал: вещи легко комбинируются между собой и уместно выглядят на встрече или в офисе.`
+          );
+        } else {
+          verdictSentences.push(
+            `Комплект подобран для активной прогулки пешком — ничего не сковывает движения и надёжно держит комфорт.`
+          );
+        }
+      }
+
+      return {
+        effectiveTemp,
+        tempSwing,
+        verdict: verdictSentences.join(' '),
+        outerwear,
+        baseTop,
+        bottom,
+        shoes,
+        accessories,
+      };
+    }
+
+    /**
+     * ============================================================================
+     * УПРАВЛЕНИЕ АТМОСФЕРНОЙ ТЕМОЙ И ЧАСТИЦАМИ ПОГОДЫ
+     * ============================================================================
+     */
+    function applyAtmosphericTheme(weather) {
+      const code = weather.weatherCode;
+      const isDay = weather.isDay === 1;
+      const isSnow = (code >= 71 && code <= 77) || code === 85 || code === 86 || weather.temp <= -3;
+      const isRain =
+        (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
+
+      let themeClass = 'theme-cloudy';
+      if (isRain) {
+        themeClass = 'theme-rain';
+      } else if (isSnow && code !== 0) {
+        themeClass = 'theme-snow';
+      } else if (!isDay) {
+        themeClass = 'theme-night';
+      } else if (code === 0 || code === 1) {
+        themeClass = 'theme-clear-day';
+      } else if (weather.temp <= -5) {
+        themeClass = 'theme-snow';
+      } else {
+        themeClass = 'theme-cloudy';
+      }
+
+      document.body.className = `${themeClass} antialiased selection:bg-sky-400 selection:text-slate-950`;
+
+      // Синхронизируем цвет корневого окна браузера и адресной строки, чтобы не было белых полей
+      const themeEdgeColors = {
+        'theme-clear-day': '#0284c7',
+        'theme-cloudy': '#1e293b',
+        'theme-rain': '#0f172a',
+        'theme-snow': '#0c4a6e',
+        'theme-night': '#090d16',
+      };
+      const edgeColor = themeEdgeColors[themeClass] || '#0f172a';
+      document.documentElement.style.backgroundColor = edgeColor;
+      document.body.style.backgroundColor = edgeColor;
+      const metaTheme = document.getElementById('themeColorMeta');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', edgeColor);
+      }
+
+      // Генерируем CSS-частицы дождя или снега
+      const particlesEl = document.getElementById('weatherParticles');
+      particlesEl.innerHTML = '';
+
+      if (isRain) {
+        const dropCount = 34;
+        for (let i = 0; i < dropCount; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'rain-drop';
+          drop.style.left = `${Math.random() * 100}%`;
+          drop.style.animationDuration = `${0.65 + Math.random() * 0.55}s`;
+          drop.style.animationDelay = `${Math.random() * 1.5}s`;
+          particlesEl.appendChild(drop);
+        }
+      } else if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
+        const flakeCount = 28;
+        for (let i = 0; i < flakeCount; i++) {
+          const flake = document.createElement('div');
+          flake.className = 'snow-flake';
+          const size = 3 + Math.random() * 4;
+          flake.style.width = `${size}px`;
+          flake.style.height = `${size}px`;
+          flake.style.left = `${Math.random() * 100}%`;
+          flake.style.animationDuration = `${3.5 + Math.random() * 4}s`;
+          flake.style.animationDelay = `${Math.random() * 3}s`;
+          particlesEl.appendChild(flake);
+        }
+      } else if (themeClass === 'theme-night') {
+        const starCount = 26;
+        for (let i = 0; i < starCount; i++) {
+          const star = document.createElement('div');
+          star.className = 'star-dot';
+          const size = 1.5 + Math.random() * 2.2;
+          star.style.width = `${size}px`;
+          star.style.height = `${size}px`;
+          star.style.left = `${Math.random() * 100}%`;
+          star.style.top = `${Math.random() * 65}%`;
+          star.style.animationDuration = `${2.2 + Math.random() * 3}s`;
+          star.style.animationDelay = `${Math.random() * 2.5}s`;
+          particlesEl.appendChild(star);
+        }
+      }
+    }
+
+    /**
+     * ============================================================================
+     * ЗАГРУЗКА ДАННЫХ ПОГОДЫ НА 7 ДНЕЙ ИЗ OPEN-METEO API
+     * ============================================================================
+     */
+    async function fetchWeatherForCity(city) {
+      const badge = document.getElementById('dataSourceBadge');
+      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> ${t().statusUpdating}`;
+
+      const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}` +
+        `&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_gusts_10m` +
+        `&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,relative_humidity_2m` +
+        `&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max` +
+        `&timezone=auto&forecast_days=7`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const json = await response.json();
+
+        const cur = json.current;
+        const hourly = json.hourly;
+        const daily = json.daily;
+        const nowHour = new Date().getHours();
+
+        const daysCount = Math.min(7, daily.time.length);
+        const builtDays = [];
+
+        for (let d = 0; d < daysCount; d++) {
+          const baseHourIdx = d * 24;
+          const sliceDefs = [
+            { hourOffset: 8, slot: 'morning' },
+            { hourOffset: 14, slot: 'afternoon' },
+            { hourOffset: 20, slot: 'evening' },
+          ];
+
+          const slices = sliceDefs.map(({ hourOffset, slot }) => {
+            const idx = baseHourIdx + hourOffset;
+            return {
+              slot,
+              temp: Math.round(hourly.temperature_2m[idx] ?? daily.temperature_2m_max[d]),
+              apparent: Math.round(
+                hourly.apparent_temperature[idx] ?? daily.apparent_temperature_max[d]
+              ),
+              code: hourly.weather_code[idx] ?? daily.weather_code[d],
+              precip: Math.round(hourly.precipitation_probability[idx] ?? 0),
+            };
+          });
+
+          const isToday = d === 0;
+          const dayPrecipMax = Math.round(daily.precipitation_probability_max[d] ?? 0);
+          const todayPrecip = Math.round(
+            Math.max(hourly.precipitation_probability[nowHour] ?? 0, slices[1].precip)
+          );
+
+          builtDays.push({
+            dateISO: daily.time[d],
+            temp: Math.round(isToday ? cur.temperature_2m : daily.temperature_2m_max[d]),
+            tempMax: Math.round(daily.temperature_2m_max[d]),
+            tempMin: Math.round(daily.temperature_2m_min[d]),
+            apparentTemp: Math.round(
+              isToday ? cur.apparent_temperature : daily.apparent_temperature_max[d]
+            ),
+            weatherCode: isToday ? cur.weather_code : daily.weather_code[d],
+            isDay: isToday ? cur.is_day : 1,
+            windSpeed: Math.round(isToday ? cur.wind_speed_10m : daily.wind_speed_10m_max[d]),
+            windGusts: Math.round(isToday ? cur.wind_gusts_10m : daily.wind_gusts_10m_max[d]),
+            humidity: Math.round(
+              isToday
+                ? cur.relative_humidity_2m
+                : hourly.relative_humidity_2m[baseHourIdx + 14] ?? 62
+            ),
+            precipProb: isToday ? todayPrecip : dayPrecipMax,
+            slices,
+          });
+        }
+
+        state.liveDays = builtDays;
+        state.isOfflineFallback = false;
+      } catch (error) {
+        console.warn('Ошибка загрузки Open-Meteo, включаем резервный прогноз на 7 дней:', error);
+        state.isOfflineFallback = true;
+        state.liveDays = buildSimulatedWeek([
+          {
+            temp: 11, tempMax: 13, tempMin: 6, apparentTemp: 9, weatherCode: 2, isDay: 1,
+            windSpeed: 15, windGusts: 23, humidity: 65, precipProb: 20,
+            slices: [
+              { slot: 'morning', temp: 7, apparent: 5, code: 3, precip: 25 },
+              { slot: 'afternoon', temp: 13, apparent: 11, code: 2, precip: 15 },
+              { slot: 'evening', temp: 8, apparent: 6, code: 1, precip: 10 },
+            ],
+          },
+          {
+            temp: 12, tempMax: 12, tempMin: 5, apparentTemp: 10, weatherCode: 1, isDay: 1,
+            windSpeed: 13, windGusts: 20, humidity: 60, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 4, code: 1, precip: 10 },
+              { slot: 'afternoon', temp: 12, apparent: 10, code: 1, precip: 10 },
+              { slot: 'evening', temp: 8, apparent: 6, code: 2, precip: 10 },
+            ],
+          },
+          {
+            temp: 9, tempMax: 9, tempMin: 4, apparentTemp: 6, weatherCode: 61, isDay: 1,
+            windSpeed: 19, windGusts: 29, humidity: 84, precipProb: 70,
+            slices: [
+              { slot: 'morning', temp: 5, apparent: 2, code: 3, precip: 45 },
+              { slot: 'afternoon', temp: 9, apparent: 6, code: 61, precip: 70 },
+              { slot: 'evening', temp: 6, apparent: 3, code: 51, precip: 55 },
+            ],
+          },
+          {
+            temp: 10, tempMax: 10, tempMin: 3, apparentTemp: 8, weatherCode: 2, isDay: 1,
+            windSpeed: 14, windGusts: 21, humidity: 66, precipProb: 15,
+            slices: [
+              { slot: 'morning', temp: 4, apparent: 2, code: 2, precip: 15 },
+              { slot: 'afternoon', temp: 10, apparent: 8, code: 1, precip: 15 },
+              { slot: 'evening', temp: 6, apparent: 4, code: 2, precip: 10 },
+            ],
+          },
+          {
+            temp: 13, tempMax: 13, tempMin: 5, apparentTemp: 12, weatherCode: 0, isDay: 1,
+            windSpeed: 10, windGusts: 16, humidity: 55, precipProb: 5,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 4, code: 0, precip: 5 },
+              { slot: 'afternoon', temp: 13, apparent: 12, code: 0, precip: 5 },
+              { slot: 'evening', temp: 8, apparent: 6, code: 1, precip: 5 },
+            ],
+          },
+          {
+            temp: 14, tempMax: 14, tempMin: 6, apparentTemp: 13, weatherCode: 1, isDay: 1,
+            windSpeed: 12, windGusts: 18, humidity: 58, precipProb: 10,
+            slices: [
+              { slot: 'morning', temp: 7, apparent: 5, code: 1, precip: 10 },
+              { slot: 'afternoon', temp: 14, apparent: 13, code: 1, precip: 10 },
+              { slot: 'evening', temp: 9, apparent: 7, code: 2, precip: 10 },
+            ],
+          },
+          {
+            temp: 11, tempMax: 11, tempMin: 5, apparentTemp: 9, weatherCode: 3, isDay: 1,
+            windSpeed: 16, windGusts: 24, humidity: 72, precipProb: 30,
+            slices: [
+              { slot: 'morning', temp: 6, apparent: 4, code: 3, precip: 25 },
+              { slot: 'afternoon', temp: 11, apparent: 9, code: 3, precip: 30 },
+              { slot: 'evening', temp: 7, apparent: 5, code: 3, precip: 20 },
+            ],
+          },
+        ]);
+      }
+
+      renderApp();
+    }
+
+    // Форматирование температуры со знаком + или -
+    function formatTemp(val) {
+      const rounded = Math.round(val);
+      return rounded > 0 ? `+${rounded}°` : `${rounded}°`;
+    }
+
+    // Форматирование подписей для 7-дневной панели и заголовков на активном языке
+    function formatDayLabels(dateISO, index) {
+      const tr = t();
+      const locale = state.lang === 'en' ? 'en-US' : 'ru-RU';
+      const dateObj = dateISO ? new Date(`${dateISO}T12:00:00`) : new Date();
+      if (!dateISO) {
+        dateObj.setDate(dateObj.getDate() + index);
+      }
+
+      const shortWeekdayRaw = new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(dateObj);
+      const shortWeekday = shortWeekdayRaw.charAt(0).toUpperCase() + shortWeekdayRaw.slice(1);
+      const shortDate = new Intl.DateTimeFormat(locale, {
+        day: 'numeric',
+        month: 'short',
+      })
+        .format(dateObj)
+        .replace('.', '');
+
+      const fullDate = new Intl.DateTimeFormat(locale, {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'long',
+      }).format(dateObj);
+
+      let primaryTitle = shortWeekday;
+      if (index === 0) primaryTitle = tr.today;
+      else if (index === 1) primaryTitle = tr.tomorrow;
+
+      return {
+        primaryTitle,
+        shortWeekday,
+        shortDate,
+        fullDate,
+      };
+    }
+
+    // Применение статических переводов ко всем элементам интерфейса
+    function applyStaticTranslations() {
+      const tr = t();
+      document.documentElement.lang = state.lang;
+      document.title = tr.pageTitle;
+
+      document.getElementById('brandTitle').textContent = tr.brandTitle;
+      document.getElementById('brandBadge').textContent = tr.brandBadge;
+      document.getElementById('brandSubtitle').textContent = tr.brandSubtitle;
+
+      document.getElementById('geoBtnMobile').title = tr.geoTooltip;
+      document.getElementById('geoBtnMobileLabel').textContent = tr.geoBtn;
+      document.getElementById('geoBtnDesktop').title = tr.geoTooltip;
+      document.getElementById('geoBtnDesktopLabel').textContent = tr.geoBtn;
+
+      document.getElementById('citySearchInput').placeholder = tr.searchPlaceholder;
+      document.getElementById('clearSearchBtn').setAttribute('aria-label', tr.clearSearchAria);
+      document.getElementById('quickLabel').textContent = tr.quickLabel;
+
+      document.getElementById('styleSectionLabel').textContent = tr.styleLabel;
+      document.getElementById('styleCasualBtn').textContent = tr.styleCasual;
+      document.getElementById('styleSmartBtn').textContent = tr.styleSmart;
+
+      document.getElementById('thermalSectionLabel').textContent = tr.thermalLabel;
+      document.getElementById('thermalColdBtn').textContent = tr.thermalCold;
+      document.getElementById('thermalNormalBtn').textContent = tr.thermalNormal;
+      document.getElementById('thermalHotBtn').textContent = tr.thermalHot;
+
+      document.getElementById('transportSectionLabel').textContent = tr.transportLabel;
+      document.getElementById('transportWalkBtn').textContent = tr.transportWalk;
+      document.getElementById('transportCarBtn').textContent = tr.transportCar;
+
+      document.getElementById('weeklyHeading').textContent = tr.weeklyHeading;
+      document.getElementById('weeklySubtitle').textContent = tr.weeklySubtitle;
+      document.getElementById('backToTodayLabel').textContent = tr.backToToday;
+
+      document.getElementById('feelsLikePrefix').textContent = tr.feelsLike;
+      document.getElementById('windLabel').textContent = tr.wind;
+      document.getElementById('humidityLabel').textContent = tr.humidity;
+      document.getElementById('precipLabel').textContent = tr.precip;
+
+      document.getElementById('daySliceHeading').textContent = tr.daySliceHeading;
+      document.getElementById('accessoriesSectionLabel').textContent = tr.accessoriesLabel;
+      document.getElementById('copyHelperText').textContent = tr.copyHelperText;
+      document.getElementById('copyOutfitBtnLabel').textContent = tr.copyBtn;
+
+      document.getElementById('simulatorHeading').textContent = tr.simulatorHeading;
+      document.getElementById('simulatorSubtitle').textContent = tr.simulatorSubtitle;
+      const isSimHidden = document.getElementById('simulatorPanel').classList.contains('hidden');
+      document.getElementById('toggleSimulatorLabel').textContent = isSimHidden
+        ? tr.openScenarios
+        : tr.hideScenarios;
+    }
+
+    /**
+     * ============================================================================
+     * ОТРИСОВКА ИНТЕРФЕЙСА
+     * ============================================================================
+     */
+    function renderApp() {
+      const tr = t();
+      applyStaticTranslations();
+
+      // Определяем активный 7-дневный массив: живой прогноз или пресет симулятора
+      const preset = SIMULATOR_PRESETS.find((p) => p.id === state.simulatorId);
+      const activeWeek = preset && !preset.isLive ? preset.days : state.liveDays;
+
+      if (!activeWeek || activeWeek.length === 0) return;
+
+      if (state.selectedDayIndex >= activeWeek.length) {
+        state.selectedDayIndex = 0;
+      }
+
+      const dayIdx = state.selectedDayIndex;
+      const activeWeather = activeWeek[dayIdx];
+      const dayLabels = formatDayLabels(activeWeather.dateISO, dayIdx);
+      const cityInfo = getLocalizedCityInfo(state.city);
+
+      // Применяем фон и анимацию осадков выбранного дня
+      applyAtmosphericTheme(activeWeather);
+
+      // Обновляем активные состояния кнопок языка, настроек, городов и симулятора
+      updateControlsUI();
+
+      // Отрисовываем 7-дневную полосу прогноза
+      renderWeeklyBar(activeWeek);
+
+      // Кнопка «Вернуться к сегодня»
+      const backBtn = document.getElementById('backToTodayBtn');
+      if (dayIdx > 0) {
+        backBtn.classList.remove('hidden');
+      } else {
+        backBtn.classList.add('hidden');
+      }
+
+      // Шапка карточки погоды
+      document.getElementById('currentCityName').textContent = cityInfo.name;
+      const dayTagPrefix =
+        dayIdx === 0 ? tr.today : dayIdx === 1 ? tr.tomorrow : dayLabels.shortWeekday;
+      document.getElementById('currentCountryDate').textContent = `${
+        cityInfo.country ? cityInfo.country + ' • ' : ''
+      }${dayTagPrefix}, ${dayLabels.fullDate}`;
+
+      const badge = document.getElementById('dataSourceBadge');
+      if (preset && !preset.isLive) {
+        badge.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/25 text-amber-200 border border-amber-400/35 shrink-0';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ${tr.statusSimulator}`;
+      } else if (state.isOfflineFallback) {
+        badge.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-200 border border-rose-400/30 shrink-0';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ${tr.statusOffline}`;
+      } else {
+        badge.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 shrink-0';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ${tr.statusOnline}`;
+      }
+
+      // Основные показатели погоды
+      document.getElementById('tempModeLabel').textContent =
+        dayIdx === 0
+          ? tr.outsideNow
+          : tr.highLowTemplate(formatTemp(activeWeather.tempMax), formatTemp(activeWeather.tempMin));
+      document.getElementById('currentTemp').textContent = formatTemp(activeWeather.temp);
+      document.getElementById('feelsLikeTemp').textContent = formatTemp(activeWeather.apparentTemp);
+      document.getElementById('weatherConditionText').textContent = describeWeatherCode(
+        activeWeather.weatherCode
+      );
+      document.getElementById('mainWeatherIcon').innerHTML = getWeatherSVG(
+        activeWeather.weatherCode,
+        activeWeather.isDay,
+        'w-24 h-24 sm:w-28 sm:h-28 drop-shadow-lg'
+      );
+
+      document.getElementById('windSpeedValue').textContent = `${activeWeather.windSpeed} ${tr.windUnit}`;
+      document.getElementById('windGustsValue').textContent = tr.gusts(activeWeather.windGusts);
+      document.getElementById('humidityValue').textContent = `${activeWeather.humidity}%`;
+      document.getElementById('humidityNote').textContent =
+        activeWeather.humidity > 80
+          ? tr.humidityHumid
+          : activeWeather.humidity < 35
+          ? tr.humidityDry
+          : tr.humidityNormal;
+      document.getElementById('precipProbValue').textContent = `${activeWeather.precipProb}%`;
+      document.getElementById('precipNote').textContent =
+        activeWeather.precipProb >= 40 ? tr.precipChance : tr.precipNone;
+
+      // Запускаем алгоритм подбора одежды для выбранного дня
+      const rec = generateOutfitRecommendation(activeWeather, dayIdx);
+
+      // Блок «Срез дня»
+      const swingBadge = document.getElementById('tempSwingBadge');
+      swingBadge.textContent =
+        rec.tempSwing >= 7 ? tr.swingLayers(rec.tempSwing) : tr.swingNormal(rec.tempSwing);
+      swingBadge.className =
+        rec.tempSwing >= 7
+          ? 'text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/25 text-amber-200 border border-amber-400/35'
+          : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-slate-200 border border-white/10';
+
+      const slotLabels = {
+        morning: tr.sliceMorning,
+        afternoon: tr.sliceAfternoon,
+        evening: tr.sliceEvening,
+      };
+
+      const daySliceGrid = document.getElementById('daySliceGrid');
+      daySliceGrid.innerHTML = activeWeather.slices
+        .map((slice, idx) => {
+          const isNightSlice = idx === 2 ? 0 : 1;
+          const sliceTitle = slotLabels[slice.slot] || slice.label || '';
+          return `
+            <div class="glass-subcard rounded-2xl p-3 flex flex-col items-center text-center">
+              <span class="text-[11px] font-semibold text-slate-300">${sliceTitle}</span>
+              <div class="my-1.5">${getWeatherSVG(slice.code, isNightSlice, 'w-10 h-10')}</div>
+              <div class="text-base sm:text-lg font-extrabold text-white font-mono">${formatTemp(slice.temp)}</div>
+              <div class="text-[11px] text-slate-400">${tr.sliceFeels} ${formatTemp(slice.apparent)}</div>
+              <div class="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-sky-200">
+                💧 ${slice.precip}%
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      // Вердикт на выбранный день
+      const verdictHeading = document.getElementById('verdictHeading');
+      if (dayIdx === 0) {
+        verdictHeading.textContent = tr.verdictToday;
+      } else if (dayIdx === 1) {
+        verdictHeading.textContent = tr.verdictTomorrow;
+      } else {
+        verdictHeading.textContent = tr.verdictFuture(dayLabels.shortWeekday, dayLabels.shortDate);
+      }
+
+      document.getElementById('effectiveTempTag').textContent = tr.effectiveTempTag(
+        formatTemp(rec.effectiveTemp)
+      );
+      document.getElementById('verdictText').textContent = rec.verdict;
+
+      // Аксессуары и детали
+      const accessoriesEl = document.getElementById('accessoriesList');
+      accessoriesEl.innerHTML = rec.accessories
+        .map(
+          (acc) => `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${acc.tone}">
+            <span>${acc.icon}</span>
+            <span>${acc.text}</span>
+          </span>
+        `
+        )
+        .join('');
+
+      // Сетка гардероба 2x2: Верх/База, Верхняя одежда, Низ, Обувь
+      const wardrobeCards = [
+        {
+          label: tr.cardBaseTop,
+          title: rec.baseTop.title,
+          detail: rec.baseTop.detail,
+          icon: getWardrobeIconSVG('top'),
+          accent: 'from-indigo-500/20 to-purple-500/10 border-indigo-400/25',
+        },
+        {
+          label: tr.cardOuterwear,
+          title: rec.outerwear.title,
+          detail: rec.outerwear.detail,
+          icon: getWardrobeIconSVG('outerwear', rec.outerwear.variant),
+          accent: 'from-sky-500/20 to-blue-500/10 border-sky-400/25',
+        },
+        {
+          label: tr.cardBottom,
+          title: rec.bottom.title,
+          detail: rec.bottom.detail,
+          icon: getWardrobeIconSVG('bottom'),
+          accent: 'from-cyan-500/20 to-teal-500/10 border-cyan-400/25',
+        },
+        {
+          label: tr.cardShoes,
+          title: rec.shoes.title,
+          detail: rec.shoes.detail,
+          icon: getWardrobeIconSVG('shoes'),
+          accent: 'from-emerald-500/20 to-green-500/10 border-emerald-400/25',
+        },
+      ];
+
+      const wardrobeGrid = document.getElementById('wardrobeGrid');
+      wardrobeGrid.innerHTML = wardrobeCards
+        .map(
+          (card) => `
+          <article class="glass-card glass-card-hover rounded-3xl p-4 sm:p-5 flex flex-col justify-between fade-in-up">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300">${card.label}</span>
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br ${card.accent} border flex items-center justify-center shrink-0">
+                  ${card.icon}
+                </div>
+              </div>
+              <h4 class="text-base sm:text-lg font-bold text-white leading-snug mb-1.5">${card.title}</h4>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${card.detail}</p>
+          </article>
+        `
+        )
+        .join('');
+
+      // Подготавливаем текст для кнопки «Скопировать образ» на активном языке
+      const accNames = rec.accessories.map((a) => `${a.icon} ${a.text}`).join(', ');
+      const dateHeader =
+        dayIdx === 0
+          ? `${tr.today} (${dayLabels.shortDate})`
+          : `${dayLabels.primaryTitle} (${dayLabels.shortDate})`;
+
+      if (state.lang === 'en') {
+        state.lastGeneratedSummary =
+          `🌤 Weather & Outfit — ${cityInfo.name}, ${dateHeader} (${formatTemp(
+            activeWeather.temp
+          )}, feels like ${formatTemp(activeWeather.apparentTemp)})\n` +
+          `💬 Stylist tip: ${rec.verdict}\n\n` +
+          `👕 Top / Base: ${rec.baseTop.title}\n` +
+          `🧥 Outerwear: ${rec.outerwear.title}\n` +
+          `👖 Bottoms: ${rec.bottom.title}\n` +
+          `👟 Footwear: ${rec.shoes.title}\n` +
+          `🎒 Extras: ${accNames}`;
+      } else {
+        state.lastGeneratedSummary =
+          `🌤 Погода и образ — ${cityInfo.name}, ${dateHeader} (${formatTemp(
+            activeWeather.temp
+          )}, ощущается как ${formatTemp(activeWeather.apparentTemp)})\n` +
+          `💬 Совет: ${rec.verdict}\n\n` +
+          `👕 Верх / База: ${rec.baseTop.title}\n` +
+          `🧥 Верхняя одежда: ${rec.outerwear.title}\n` +
+          `👖 Низ: ${rec.bottom.title}\n` +
+          `👟 Обувь: ${rec.shoes.title}\n` +
+          `🎒 Детали: ${accNames}`;
+      }
+    }
+
+    // Отрисовка 7 интерактивных карточек дней недели
+    function renderWeeklyBar(weekDays) {
+      const tr = t();
+      const grid = document.getElementById('weeklyDaysGrid');
+      grid.innerHTML = weekDays
+        .map((day, idx) => {
+          const isSelected = idx === state.selectedDayIndex;
+          const labels = formatDayLabels(day.dateISO, idx);
+          const showRainBadge = day.precipProb >= 25;
+
+          return `
+            <button
+              type="button"
+              data-day-index="${idx}"
+              aria-pressed="${isSelected}"
+              class="rounded-2xl p-3 flex flex-col items-center text-center transition border select-none ${
+                isSelected
+                  ? 'bg-white/22 border-sky-300 shadow-lg shadow-sky-500/20 ring-2 ring-sky-400/40 scale-[1.01]'
+                  : 'bg-white/6 border-white/10 hover:bg-white/14 hover:border-white/25'
+              }"
+            >
+              <span class="text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-200'}">
+                ${labels.primaryTitle}
+              </span>
+              <span class="text-[11px] text-slate-400 mt-0.5">${labels.shortDate}</span>
+              <div class="my-2">
+                ${getWeatherSVG(day.weatherCode, 1, 'w-10 h-10')}
+              </div>
+              <div class="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-mono">
+                <span class="font-extrabold text-white">${formatTemp(day.tempMax)}</span>
+                <span class="text-slate-400 font-medium">${formatTemp(day.tempMin)}</span>
+              </div>
+              <div class="mt-1.5 min-h-[20px] flex items-center justify-center">
+                ${
+                  showRainBadge
+                    ? `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/25 text-sky-200 border border-sky-400/30">💧 ${day.precipProb}%</span>`
+                    : `<span class="text-[10px] text-slate-400/80">${tr.dry}</span>`
+                }
+              </div>
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    // Подсветка активных кнопок языка, настроек, городов и симулятора
+    function updateControlsUI() {
+      const tr = t();
+
+      // Кнопки переключателя языка RU | EN
+      document.querySelectorAll('.lang-toggle-btn').forEach((btn) => {
+        const isActive = btn.dataset.lang === state.lang;
+        if (isActive) {
+          btn.className =
+            'lang-toggle-btn px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-white text-slate-900 shadow-sm';
+        } else {
+          btn.className =
+            'lang-toggle-btn px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white hover:bg-white/10';
+        }
+      });
+
+      // Настройки-пилюли
+      document.querySelectorAll('.setting-pill').forEach((btn) => {
+        const setting = btn.dataset.setting;
+        const value = btn.dataset.value;
+        const isActive = state[setting] === value;
+
+        if (isActive) {
+          btn.className =
+            'setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition text-center bg-white text-slate-900 shadow-md';
+        } else {
+          btn.className =
+            'setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-medium transition text-center text-slate-300 hover:text-white hover:bg-white/10';
+        }
+      });
+
+      // Быстрые города
+      const quickContainer = document.getElementById('quickCitiesContainer');
+      quickContainer.innerHTML = QUICK_CITIES.map((city) => {
+        const isCurrent =
+          Math.abs(city.lat - state.city.lat) < 0.05 && Math.abs(city.lon - state.city.lon) < 0.05;
+        return `
+          <button
+            type="button"
+            data-quick-city-id="${city.id}"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border ${
+              isCurrent
+                ? 'bg-white text-slate-900 border-white shadow-sm'
+                : 'bg-white/10 text-slate-200 border-white/15 hover:bg-white/20'
+            }"
+          >
+            ${city.name[state.lang]}
+          </button>
+        `;
+      }).join('');
+
+      // Сценарии симулятора
+      const presetsGrid = document.getElementById('simulatorPresetsGrid');
+      presetsGrid.innerHTML = SIMULATOR_PRESETS.map((preset) => {
+        const isActive = state.simulatorId === preset.id;
+        const presetText = tr.simPresets[preset.id] || { label: preset.id, desc: '' };
+        return `
+          <button
+            type="button"
+            data-preset-id="${preset.id}"
+            class="text-left p-3 rounded-2xl border transition ${
+              isActive
+                ? 'bg-sky-500/30 border-sky-300 text-white shadow-lg shadow-sky-500/15'
+                : 'bg-white/8 border-white/12 text-slate-200 hover:bg-white/15'
+            }"
+          >
+            <div class="text-xs sm:text-sm font-bold">${presetText.label}</div>
+            <div class="text-[11px] text-slate-300 mt-0.5">${presetText.desc}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    /**
+     * ============================================================================
+     * ЖИВОЙ ПОИСК ГОРОДОВ И ГЕОЛОКАЦИЯ (GPS)
+     * ============================================================================
+     */
+    let searchDebounceTimer = null;
+
+    async function searchCities(query) {
+      const tr = t();
+      const dropdown = document.getElementById('searchDropdown');
+      if (!query || query.trim().length < 2) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      dropdown.classList.remove('hidden');
+      dropdown.innerHTML = `<div class="px-4 py-3 text-xs text-slate-300">${tr.searchingCities}</div>`;
+
+      try {
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          query.trim()
+        )}&count=6&language=${state.lang}&format=json`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.results || data.results.length === 0) {
+          dropdown.innerHTML = `<div class="px-4 py-3 text-xs text-slate-400">${tr.noCitiesFound}</div>`;
+          return;
+        }
+
+        dropdown.innerHTML = data.results
+          .map(
+            (item, idx) => `
+            <button
+              type="button"
+              data-result-idx="${idx}"
+              class="w-full text-left px-4 py-3 hover:bg-white/12 border-b border-white/10 last:border-none transition flex items-center justify-between gap-2"
+            >
+              <div>
+                <div class="text-sm font-semibold text-white">${item.name}</div>
+                <div class="text-xs text-slate-400">
+                  ${[item.admin1, item.country].filter(Boolean).join(', ')}
+                </div>
+              </div>
+              <span class="text-[11px] text-sky-300 font-medium shrink-0">${tr.selectCityBtn}</span>
+            </button>
+          `
+          )
+          .join('');
+
+        // Навешиваем обработчики на результаты поиска
+        dropdown.querySelectorAll('button[data-result-idx]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const chosen = data.results[Number(btn.dataset.resultIdx)];
+            selectCity({
+              name: chosen.name,
+              country: chosen.country || '',
+              names: { [state.lang]: chosen.name },
+              countries: { [state.lang]: chosen.country || '' },
+              lat: chosen.latitude,
+              lon: chosen.longitude,
+            });
+            dropdown.classList.add('hidden');
+            document.getElementById('citySearchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+          });
+        });
+      } catch (err) {
+        dropdown.innerHTML = `<div class="px-4 py-3 text-xs text-rose-300">${tr.searchError}</div>`;
+      }
+    }
+
+    function selectCity(cityObj) {
+      state.city = cityObj;
+      state.simulatorId = 'live'; // При смене города возвращаем реальную погоду
+      state.selectedDayIndex = 0; // Сбрасываем выбор на «Сегодня»
+      saveState();
+      fetchWeatherForCity(cityObj);
+    }
+
+    // Подгрузка перевода названия выбранного города при смене языка
+    async function localizeCurrentCityOnLangSwitch(targetLang) {
+      const quickMatch = QUICK_CITIES.find(
+        (q) => Math.abs(q.lat - state.city.lat) < 0.05 && Math.abs(q.lon - state.city.lon) < 0.05
+      );
+      if (quickMatch) return;
+      if (state.city.names && state.city.names[targetLang]) return;
+
+      try {
+        const revRes = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${state.city.lat}&longitude=${state.city.lon}&localityLanguage=${targetLang}`
+        );
+        const revData = await revRes.json();
+        const localizedName = revData.city || revData.locality;
+        const localizedCountry = revData.countryName || '';
+        if (localizedName) {
+          state.city.names = { ...(state.city.names || {}), [targetLang]: localizedName };
+          state.city.countries = { ...(state.city.countries || {}), [targetLang]: localizedCountry };
+          saveState();
+          if (state.lang === targetLang) {
+            renderApp();
+          }
+        }
+      } catch (e) {
+        // Если сеть недоступна, оставляем текущее название города
+      }
+    }
+
+    // Определение местоположения по GPS
+    function detectUserLocation() {
+      const tr = t();
+      if (!navigator.geolocation) {
+        showToast(tr.geoUnsupported);
+        return;
+      }
+
+      showToast(tr.geoDetecting);
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = Number(pos.coords.latitude.toFixed(4));
+          const lon = Number(pos.coords.longitude.toFixed(4));
+          let cityName = t().myLocation;
+          let countryName = '';
+
+          try {
+            const revRes = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${state.lang}`
+            );
+            const revData = await revRes.json();
+            if (revData.city || revData.locality) {
+              cityName = revData.city || revData.locality;
+            }
+            if (revData.countryName) {
+              countryName = revData.countryName;
+            }
+          } catch (e) {
+            // Если обратное геокодирование недоступно, оставляем локализованную подпись
+          }
+
+          selectCity({
+            name: cityName,
+            country: countryName,
+            names: { [state.lang]: cityName },
+            countries: { [state.lang]: countryName },
+            lat,
+            lon,
+          });
+          showToast(t().geoUpdated(cityName));
+        },
+        () => {
+          showToast(t().geoDenied);
+        },
+        { timeout: 8000 }
+      );
+    }
+
+    // Всплывающее уведомление
+    let toastTimeout = null;
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMessage');
+      msgEl.textContent = message;
+
+      toast.classList.remove('opacity-0', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2800);
+    }
+
+    // Копирование текста в буфер обмена (надёжно работает в iframe)
+    function copyOutfitToClipboard() {
+      const tr = t();
+      if (!state.lastGeneratedSummary) return;
+
+      const textArea = document.createElement('textarea');
+      textArea.value = state.lastGeneratedSummary;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+        showToast(tr.copiedToast);
+      } catch (err) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(state.lastGeneratedSummary);
+          showToast(tr.copiedToast);
+        } else {
+          showToast(tr.copyFailToast);
+        }
+      } finally {
+        document.body.removeChild(textArea);
+      }
+    }
+
+    /**
+     * ============================================================================
+     * ИНИЦИАЛИЗАЦИЯ И СОБЫТИЯ
+     * ============================================================================
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSavedState();
+      applyStaticTranslations();
+
+      // Переключатель языка RU / EN
+      document.querySelectorAll('.lang-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const nextLang = btn.dataset.lang;
+          if (!['ru', 'en'].includes(nextLang) || state.lang === nextLang) return;
+          state.lang = nextLang;
+          saveState();
+          renderApp();
+          localizeCurrentCityOnLangSwitch(nextLang);
+          showToast(t().langToast);
+        });
+      });
+
+      // Переключатели настроек (Стиль, Теплоощущение, Транспорт)
+      document.querySelectorAll('.setting-pill').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const setting = btn.dataset.setting;
+          const value = btn.dataset.value;
+          state[setting] = value;
+          saveState();
+          renderApp();
+        });
+      });
+
+      // Быстрые города (делегирование событий)
+      document.getElementById('quickCitiesContainer').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-quick-city-id]');
+        if (!btn) return;
+        const found = QUICK_CITIES.find((c) => c.id === btn.dataset.quickCityId);
+        if (found) {
+          selectCity({
+            name: found.name[state.lang],
+            country: found.country[state.lang],
+            names: found.name,
+            countries: found.country,
+            lat: found.lat,
+            lon: found.lon,
+          });
+        }
+      });
+
+      // Выбор дня в 7-дневной полосе прогноза
+      document.getElementById('weeklyDaysGrid').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-day-index]');
+        if (!btn) return;
+        state.selectedDayIndex = Number(btn.dataset.dayIndex);
+        renderApp();
+      });
+
+      // Кнопка «Вернуться к сегодня»
+      document.getElementById('backToTodayBtn').addEventListener('click', () => {
+        state.selectedDayIndex = 0;
+        renderApp();
+      });
+
+      // Поиск города с задержкой (debounce)
+      const searchInput = document.getElementById('citySearchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+
+      searchInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        clearBtn.classList.toggle('hidden', val.length === 0);
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => searchCities(val), 300);
+      });
+
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.classList.add('hidden');
+        document.getElementById('searchDropdown').classList.add('hidden');
+        searchInput.focus();
+      });
+
+      // Закрытие выпадающего списка при клике вне поиска
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#citySearchInput') && !e.target.closest('#searchDropdown')) {
+          document.getElementById('searchDropdown').classList.add('hidden');
+        }
+      });
+
+      // Кнопки геолокации
+      document.getElementById('geoBtnMobile').addEventListener('click', detectUserLocation);
+      document.getElementById('geoBtnDesktop').addEventListener('click', detectUserLocation);
+
+      // Кнопка копирования образа
+      document.getElementById('copyOutfitBtn').addEventListener('click', copyOutfitToClipboard);
+
+      // Тест-симулятор: раскрытие панели и выбор сценариев
+      const toggleSimBtn = document.getElementById('toggleSimulatorBtn');
+      const simPanel = document.getElementById('simulatorPanel');
+      const simLabel = document.getElementById('toggleSimulatorLabel');
+      const simChevron = document.getElementById('toggleSimulatorChevron');
+
+      toggleSimBtn.addEventListener('click', () => {
+        const tr = t();
+        const isHidden = simPanel.classList.contains('hidden');
+        simPanel.classList.toggle('hidden');
+        simLabel.textContent = isHidden ? tr.hideScenarios : tr.openScenarios;
+        simChevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+
+      document.getElementById('simulatorPresetsGrid').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-preset-id]');
+        if (!btn) return;
+        state.simulatorId = btn.dataset.presetId;
+        state.selectedDayIndex = 0;
+        renderApp();
+        const presetText = t().simPresets[state.simulatorId];
+        if (presetText) showToast(t().modeToast(presetText.label));
+      });
+
+      // Первый запуск: загружаем реальную погоду для сохранённого города (или Кишинёва)
+      fetchWeatherForCity(state.city);
+    });
+  </script>
+</body>
+</html>
