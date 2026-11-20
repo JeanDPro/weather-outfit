@@ -414,12 +414,12 @@
 
     <!-- 2. ПАНЕЛЬ ПЕРСОНАЛЬНЫХ НАСТРОЕК (ПИЛЮЛИ) -->
     <section class="glass-card rounded-3xl p-3.5 sm:p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="flex flex-col gap-3">
         
-        <!-- Переключатель стиля -->
+        <!-- Переключатель стиля (4 стиля: Кэжуал, Смарт-кэжуал, Спортивный, Классика) -->
         <div class="flex flex-col gap-1.5">
           <span id="styleSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Стиль гардероба</span>
-          <div class="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Стиль одежды">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Стиль одежды">
             <button
               id="styleCasualBtn"
               type="button"
@@ -438,65 +438,86 @@
             >
               🧥 Смарт-кэжуал
             </button>
-          </div>
-        </div>
-
-        <!-- Переключатель теплоощущения -->
-        <div class="flex flex-col gap-1.5">
-          <span id="thermalSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Как ощущаешь холод</span>
-          <div class="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Теплоощущение">
             <button
-              id="thermalColdBtn"
+              id="styleSportBtn"
               type="button"
-              data-setting="thermal"
-              data-value="cold"
-              class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              data-setting="style"
+              data-value="sport"
+              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
             >
-              ❄️ Мерзляк
+              🏃 Спортивный
             </button>
             <button
-              id="thermalNormalBtn"
+              id="styleClassicBtn"
               type="button"
-              data-setting="thermal"
-              data-value="normal"
-              class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              data-setting="style"
+              data-value="classic"
+              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
             >
-              👌 Норма
-            </button>
-            <button
-              id="thermalHotBtn"
-              type="button"
-              data-setting="thermal"
-              data-value="hot"
-              class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
-            >
-              🔥 Жарко
+              👔 Классика
             </button>
           </div>
         </div>
 
-        <!-- Переключатель способа передвижения -->
-        <div class="flex flex-col gap-1.5">
-          <span id="transportSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Как передвигаешься</span>
-          <div class="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Способ передвижения">
-            <button
-              id="transportWalkBtn"
-              type="button"
-              data-setting="transport"
-              data-value="walk"
-              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
-            >
-              🚶 Пешком
-            </button>
-            <button
-              id="transportCarBtn"
-              type="button"
-              data-setting="transport"
-              data-value="car"
-              class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
-            >
-              🚗 На машине
-            </button>
+        <!-- Теплоощущение и способ передвижения -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <!-- Переключатель теплоощущения -->
+          <div class="md:col-span-7 flex flex-col gap-1.5">
+            <span id="thermalSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Как ощущаешь холод</span>
+            <div class="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Теплоощущение">
+              <button
+                id="thermalColdBtn"
+                type="button"
+                data-setting="thermal"
+                data-value="cold"
+                class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              >
+                ❄️ Мерзляк
+              </button>
+              <button
+                id="thermalNormalBtn"
+                type="button"
+                data-setting="thermal"
+                data-value="normal"
+                class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              >
+                👌 Норма
+              </button>
+              <button
+                id="thermalHotBtn"
+                type="button"
+                data-setting="thermal"
+                data-value="hot"
+                class="setting-pill py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              >
+                🔥 Жарко
+              </button>
+            </div>
+          </div>
+
+          <!-- Переключатель способа передвижения -->
+          <div class="md:col-span-5 flex flex-col gap-1.5">
+            <span id="transportSectionLabel" class="text-[11px] uppercase tracking-wider font-semibold text-slate-300 px-1">Как передвигаешься</span>
+            <div class="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-slate-950/45 border border-white/10" role="group" aria-label="Способ передвижения">
+              <button
+                id="transportWalkBtn"
+                type="button"
+                data-setting="transport"
+                data-value="walk"
+                class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              >
+                🚶 Пешком
+              </button>
+              <button
+                id="transportCarBtn"
+                type="button"
+                data-setting="transport"
+                data-value="car"
+                class="setting-pill py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-center"
+              >
+                🚗 На машине
+              </button>
+            </div>
           </div>
         </div>
 
@@ -821,6 +842,8 @@
         styleLabel: 'Стиль гардероба',
         styleCasual: '👟 Кэжуал',
         styleSmart: '🧥 Смарт-кэжуал',
+        styleSport: '🏃 Спортивный',
+        styleClassic: '👔 Классика',
         thermalLabel: 'Как ощущаешь холод',
         thermalCold: '❄️ Мерзляк',
         thermalNormal: '👌 Норма',
@@ -940,6 +963,8 @@
         styleLabel: 'Wardrobe style',
         styleCasual: '👟 Casual',
         styleSmart: '🧥 Smart Casual',
+        styleSport: '🏃 Sporty',
+        styleClassic: '👔 Classic',
         thermalLabel: 'Cold sensitivity',
         thermalCold: '❄️ Cold-sensitive',
         thermalNormal: '👌 Normal',
@@ -1426,7 +1451,7 @@
     let state = {
       lang: 'ru',           // 'ru' | 'en'
       city: { name: 'Кишинёв', country: 'Молдова', names: { ru: 'Кишинёв', en: 'Chișinău' }, countries: { ru: 'Молдова', en: 'Moldova' }, lat: 47.0056, lon: 28.8575 },
-      style: 'casual',      // 'casual' | 'smart'
+      style: 'casual',      // 'casual' | 'smart' | 'sport' | 'classic'
       thermal: 'normal',    // 'cold' (-3) | 'normal' (0) | 'hot' (+3)
       transport: 'walk',    // 'walk' | 'car'
       simulatorId: 'live',  // 'live' | 'frost' | 'rain' | 'swing' | 'heat'
@@ -1448,7 +1473,7 @@
         if (parsed.city && typeof parsed.city.lat === 'number') {
           state.city = parsed.city;
         }
-        if (['casual', 'smart'].includes(parsed.style)) {
+        if (['casual', 'smart', 'sport', 'classic'].includes(parsed.style)) {
           state.style = parsed.style;
         }
         if (['cold', 'normal', 'hot'].includes(parsed.thermal)) {
@@ -1648,11 +1673,12 @@
     /**
      * ============================================================================
      * УМНЫЙ АЛГОРИТМ ПОДБОРА ГАРДЕРОБА И ВЕРДИКТА (RU / EN)
+     * Поддержка 4 стилей: casual, smart, sport, classic
      * ============================================================================
      */
     function generateOutfitRecommendation(weather, dayIndex = 0) {
       const isEn = state.lang === 'en';
-      const isSmart = state.style === 'smart';
+      const style = state.style; // 'casual' | 'smart' | 'sport' | 'classic'
       const isCar = state.transport === 'car';
       const isFutureDay = dayIndex > 0;
 
@@ -1698,10 +1724,23 @@
       let shoes = { title: '', detail: '' };
       const accessories = [];
 
-      // 1. ПОДБОР ВЕРХНЕЙ ОДЕЖДЫ (по outerwearTemp)
+      // 1. ПОДБОР ВЕРХНЕЙ ОДЕЖДЫ (по outerwearTemp и стилю)
       if (outerwearTemp <= -7) {
-        if (isEn) {
-          outerwear = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: isCar ? 'Short down puffer jacket' : 'Heavy insulated parka or down coat',
+                detail: isCar
+                  ? 'Unrestrictive behind the wheel and warms up fast when stepping outside.'
+                  : 'Mid-thigh insulated down jacket with a storm hood.',
+              }
+            : {
+                title: isCar ? 'Короткий зимний пуховик' : 'Тёплый объёмный пуховик или аляска',
+                detail: isCar
+                  ? 'Не сковывает движения за рулём и быстро согревает на парковке.'
+                  : 'Надёжный пуховик до середины бедра с капюшоном.',
+              },
+          smart: isEn
             ? {
                 title: isCar ? 'Cropped wool coat or insulated parka' : 'Full-length heavy parka or winter coat',
                 detail: isCar
@@ -1709,55 +1748,91 @@
                   : 'Maximum protection against freezing air and wind, ideally with a high collar.',
               }
             : {
-                title: isCar ? 'Short down puffer jacket' : 'Heavy insulated parka or down coat',
-                detail: isCar
-                  ? 'Unrestrictive behind the wheel and warms up fast when stepping outside.'
-                  : 'Mid-thigh insulated down jacket with a storm hood.',
-              };
-        } else {
-          outerwear = isSmart
-            ? {
                 title: isCar ? 'Укороченное шерстяное пальто или парка' : 'Длинная тёплая парка или пуховик',
                 detail: isCar
                   ? 'Удобная длина для руля, но с плотным утеплителем на случай выхода из авто.'
                   : 'Максимум защиты от мороза и ветра, желательно с высоким воротником.',
-              }
-            : {
-                title: isCar ? 'Короткий зимний пуховик' : 'Тёплый объёмный пуховик или аляска',
-                detail: isCar
-                  ? 'Не сковывает движения за рулём и быстро согревает на парковке.'
-                  : 'Надёжный пуховик до середины бедра с капюшоном.',
-              };
-        }
-      } else if (outerwearTemp <= 2) {
-        if (isEn) {
-          outerwear = isSmart
+              },
+          sport: isEn
             ? {
-                title: isCar ? 'Insulated peacoat or quilted jacket' : 'Insulated wool overcoat',
-                detail: 'Holds a sharp silhouette, blocks chilly gusts, and looks polished in the city.',
+                title: isCar ? 'Lightweight athletic down jacket' : 'Insulated alpine shell or long bench puffer',
+                detail: 'Windproof membrane with high-loft insulation that breathes during brisk movement.',
               }
             : {
+                title: isCar ? 'Лёгкий спортивный пуховик' : 'Мембранная зимняя куртка или длинный спортивный пуховик',
+                detail: 'Непродуваемая ткань и лёгкий утеплитель — держит тепло и отводит влагу при ходьбе.',
+              },
+          classic: isEn
+            ? {
+                title: isCar ? 'Tailored cropped wool overcoat' : 'Full-length double-breasted wool or cashmere coat',
+                detail: 'Insulated lining and structured shoulders keep a sharp silhouette even in deep frost.',
+              }
+            : {
+                title: isCar ? 'Укороченное классическое пальто из шерсти' : 'Длинное шерстяное или кашемировое пальто на утеплителе',
+                detail: 'Благородная плотная шерсть защищает от мороза и сохраняет строгий силуэт.',
+              },
+        };
+        outerwear = map[style] || map.casual;
+      } else if (outerwearTemp <= 2) {
+        const map = {
+          casual: isEn
+            ? {
                 title: isCar ? 'Quilted jacket or insulated bomber' : 'Mid-weight puffer or lined parka',
                 detail: isWindy
                   ? 'Go for a storm-flap front and an adjustable hood to block gusts.'
                   : 'Balanced warmth without overheating indoors or on transit.',
-              };
-        } else {
-          outerwear = isSmart
-            ? {
-                title: isCar ? 'Утеплённый бушлат или стёганая куртка' : 'Шерстяное пальто на утеплителе',
-                detail: 'Держит форму, защищает от продувания и отлично смотрится в городе.',
               }
             : {
                 title: isCar ? 'Стёганая куртка или утеплённый бомбер' : 'Демисезонный пуховик или парка',
                 detail: isWindy
                   ? 'Выбирай модель с ветрозащитной планкой и капюшоном.'
                   : 'Оптимальный баланс тепла без эффекта сауны в транспорте.',
-              };
-        }
+              },
+          smart: isEn
+            ? {
+                title: isCar ? 'Insulated peacoat or quilted jacket' : 'Insulated wool overcoat',
+                detail: 'Holds a sharp silhouette, blocks chilly gusts, and looks polished in the city.',
+              }
+            : {
+                title: isCar ? 'Утеплённый бушлат или стёганая куртка' : 'Шерстяное пальто на утеплителе',
+                detail: 'Держит форму, защищает от продувания и отлично смотрится в городе.',
+              },
+          sport: isEn
+            ? {
+                title: isCar ? 'Insulated softshell jacket' : 'Weather-resistant athletic puffer or thermal shell',
+                detail: 'Elastic cuffs and sealed zippers lock out cold wind during active walks.',
+              }
+            : {
+                title: isCar ? 'Утеплённый софтшелл или спортивная стёганая куртка' : 'Лёгкий спортивный пуховик или куртка-мембрана',
+                detail: 'Эластичные манжеты и высокий воротник не пропускают холодный ветер.',
+              },
+          classic: isEn
+            ? {
+                title: isCar ? 'Classic wool peacoat or car coat' : 'Tailored wool overcoat',
+                detail: 'Timeless cut that sits cleanly over a suit jacket, blazer, or fine knitwear.',
+              }
+            : {
+                title: isCar ? 'Классическое полупальто (car coat) или бушлат' : 'Прямое шерстяное пальто',
+                detail: 'Безупречный крой, который свободно садится поверх пиджака, жакета или свитера.',
+              },
+        };
+        outerwear = map[style] || map.casual;
       } else if (outerwearTemp <= 10) {
-        if (isEn) {
-          outerwear = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: hasRain ? 'Waterproof shell parka or rain jacket' : 'Lined windbreaker, bomber, or leather jacket',
+                detail: isWindy
+                  ? 'A dense outer shell keeps brisk gusts out.'
+                  : 'Lightweight jacket that moves comfortably with you all day.',
+              }
+            : {
+                title: hasRain ? 'Непромокаемая парка или мембранная куртка' : 'Утеплённая ветровка, бомбер или косуха',
+                detail: isWindy
+                  ? 'Плотный верх закроет от порывов ветра.'
+                  : 'Лёгкая куртка, в которой комфортно двигаться весь день.',
+              },
+          smart: isEn
             ? {
                 title: hasRain ? 'Water-repellent trench or mac coat' : 'Classic wool coat or trench',
                 detail: hasRain
@@ -1765,52 +1840,75 @@
                   : 'Layers effortlessly over knitwear or a tailored blazer.',
               }
             : {
-                title: hasRain ? 'Waterproof shell parka or rain jacket' : 'Lined windbreaker, bomber, or leather jacket',
-                detail: isWindy
-                  ? 'A dense outer shell keeps brisk gusts out.'
-                  : 'Lightweight jacket that moves comfortably with you all day.',
-              };
-        } else {
-          outerwear = isSmart
-            ? {
                 title: hasRain ? 'Плотный тренч или макинтош' : 'Классическое пальто или тренч',
                 detail: hasRain
                   ? 'Водоотталкивающая ткань спасёт от мороси и сохранит деловой вид.'
                   : 'Идеально ложится поверх трикотажа или пиджака.',
-              }
-            : {
-                title: hasRain ? 'Непромокаемая парка или мембранная куртка' : 'Утеплённая ветровка, бомбер или косуха',
-                detail: isWindy
-                  ? 'Плотный верх закроет от порывов ветра.'
-                  : 'Лёгкая куртка, в которой комфортно двигаться весь день.',
-              };
-        }
-      } else if (outerwearTemp <= 17) {
-        if (isEn) {
-          outerwear = isSmart
+              },
+          sport: isEn
             ? {
-                title: hasRain ? 'Lightweight mac or trench coat' : 'Blazer, cardigan, or light trench',
-                detail: 'Wear it open during the warm afternoon and button up toward evening.',
+                title: hasRain ? 'Waterproof breathable running/trail shell' : 'Windproof softshell or athletic track jacket',
+                detail: 'Ultra-light protection that blocks wind and drizzle without trapping sweat.',
               }
             : {
+                title: hasRain ? 'Мембранная ветровка с проклеенными швами' : 'Ветрозащитный софтшелл или утеплённая олимпийка',
+                detail: 'Защищает от ветра и сырости, сохраняя полную свободу движений.',
+              },
+          classic: isEn
+            ? {
+                title: hasRain ? 'Belted gabardine trench coat' : 'Unlined wool coat or structured trench',
+                detail: 'Clean, formal lines that elevate both business and evening attire.',
+              }
+            : {
+                title: hasRain ? 'Габардиновый тренч с поясом' : 'Демисезонное пальто или классический тренч',
+                detail: 'Строгие линии и благородная ткань для делового и элегантного образа.',
+              },
+        };
+        outerwear = map[style] || map.casual;
+      } else if (outerwearTemp <= 17) {
+        const map = {
+          casual: isEn
+            ? {
                 title: hasRain ? 'Packable rain shell or anorak' : 'Denim jacket, overshirt, or light windbreaker',
                 detail: hasBigSwing
                   ? 'Easy to take off midday and throw back on in the evening.'
                   : 'Featherlight outer layer for a breezy walk.',
-              };
-        } else {
-          outerwear = isSmart
-            ? {
-                title: hasRain ? 'Лёгкий плащ или тренч' : 'Блейзер, кардиган или лёгкий тренч',
-                detail: 'Можно носить нараспашку днём и застегнуть ближе к вечеру.',
               }
             : {
                 title: hasRain ? 'Лёгкий дождевик или анорак' : 'Джинсовка, овершот или лёгкая ветровка',
                 detail: hasBigSwing
                   ? 'Днём можно снять, а утром и вечером накинуть поверх футболки.'
                   : 'Невесомый верхний слой для комфортной прогулки.',
-              };
-        }
+              },
+          smart: isEn
+            ? {
+                title: hasRain ? 'Lightweight mac or trench coat' : 'Blazer, cardigan, or light trench',
+                detail: 'Wear it open during the warm afternoon and button up toward evening.',
+              }
+            : {
+                title: hasRain ? 'Лёгкий плащ или тренч' : 'Блейзер, кардиган или лёгкий тренч',
+                detail: 'Можно носить нараспашку днём и застегнуть ближе к вечеру.',
+              },
+          sport: isEn
+            ? {
+                title: hasRain ? 'Featherweight packable rain windbreaker' : 'Ultralight running windbreaker or zip track top',
+                detail: 'Folds easily into a backpack or ties around the waist when the sun warms up.',
+              }
+            : {
+                title: hasRain ? 'Ультралёгкий беговой дождевик' : 'Невесомая ветровка или спортивная кофта на молнии',
+                detail: 'Легко убрать в рюкзак или повязать на пояс, если днём пригреет солнце.',
+              },
+          classic: isEn
+            ? {
+                title: hasRain ? 'Lightweight formal raincoat' : 'Structured tailored blazer or light trench',
+                detail: 'Polished outer layer that holds crisp lapels and transitions smoothly into evening.',
+              }
+            : {
+                title: hasRain ? 'Лёгкий классический плащ' : 'Структурированный пиджак / жакет или лёгкий тренч',
+                detail: 'Держит аккуратную линию плеч и легко адаптируется к вечерней прохладе.',
+              },
+        };
+        outerwear = map[style] || map.casual;
       } else {
         if (isEn) {
           outerwear = {
@@ -1831,54 +1929,99 @@
         }
       }
 
-      // 2. ПОДБОР БАЗОВОГО ВЕРХА И СЛОЁВ (по effectiveTemp)
+      // 2. ПОДБОР БАЗОВОГО ВЕРХА И СЛОЁВ (по effectiveTemp и стилю)
       if (effectiveTemp <= -5) {
-        if (isEn) {
-          baseTop = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Thermal tee + heavy fleece hoodie',
+                detail: 'Smart layering traps heat far better than a single bulky sweater.',
+              }
+            : {
+                title: 'Термобельё / футболка + плотное худи на флисе',
+                detail: 'Многослойность работает лучше одного толстого свитера.',
+              },
+          smart: isEn
             ? {
                 title: 'Thermal base top + merino sweater or turtleneck',
                 detail: 'Two-layer upper insulation locks in warmth during cold waits outside.',
               }
             : {
-                title: 'Thermal tee + heavy fleece hoodie',
-                detail: 'Smart layering traps heat far better than a single bulky sweater.',
-              };
-        } else {
-          baseTop = isSmart
-            ? {
                 title: 'Термолонгслив + шерстяной свитер или водолазка',
                 detail: 'Двухслойный верх удерживает тепло даже при долгом ожидании на улице.',
+              },
+          sport: isEn
+            ? {
+                title: 'Moisture-wicking thermal base + microfleece zip pullover',
+                detail: 'Keeps your core warm while wicking away sweat during active movement.',
               }
             : {
-                title: 'Термобельё / футболка + плотное худи на флисе',
-                detail: 'Многослойность работает лучше одного толстого свитера.',
-              };
-        }
+                title: 'Спортивное термобельё + флисовая кофта на молнии',
+                detail: 'Сохраняет тепло корпуса и быстро отводит влагу при активной ходьбе.',
+              },
+          classic: isEn
+            ? {
+                title: 'Fine merino turtleneck or shirt + cashmere V-neck sweater',
+                detail: 'Refined warm layering that looks crisp under a tailored coat.',
+              }
+            : {
+                title: 'Тонкая шерстяная водолазка или сорочка + кашемировый джемпер',
+                detail: 'Элегантная многослойность без лишнего объёма под пальто.',
+              },
+        };
+        baseTop = map[style] || map.casual;
       } else if (effectiveTemp <= 4) {
-        if (isEn) {
-          baseTop = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Crewneck tee + sweatshirt or hoodie',
+                detail: 'Cozy outdoors and effortless to peel off in a café or office.',
+              }
+            : {
+                title: 'Футболка + свитшот или худи',
+                detail: 'Классическая связка: уютно на улице и удобно снять кофту в кафе или офисе.',
+              },
+          smart: isEn
             ? {
                 title: 'Cashmere jumper, turtleneck, or shirt + gilet',
                 detail: 'Refined mid-layer that stays comfortable once you step indoors.',
               }
             : {
-                title: 'Crewneck tee + sweatshirt or hoodie',
-                detail: 'Cozy outdoors and effortless to peel off in a café or office.',
-              };
-        } else {
-          baseTop = isSmart
-            ? {
                 title: 'Кашемировый джемпер, водолазка или рубашка + жилет',
                 detail: 'Аккуратный тёплый слой, в котором не жарко в помещении.',
+              },
+          sport: isEn
+            ? {
+                title: 'Tech long-sleeve + athletic fleece or training hoodie',
+                detail: 'Soft, stretchy mid-layer built for comfort outdoors and in the gym.',
               }
             : {
-                title: 'Футболка + свитшот или худи',
-                detail: 'Классическая связка: уютно на улице и удобно снять кофту в кафе или офисе.',
-              };
-        }
+                title: 'Спортивный лонгслив + флисовый свитшот или худи',
+                detail: 'Мягкий эластичный слой, не сковывающий плечи и руки.',
+              },
+          classic: isEn
+            ? {
+                title: 'Crisp shirt or blouse + fine-knit cardigan or blazer',
+                detail: 'Balanced office-ready warmth with clean, timeless proportions.',
+              }
+            : {
+                title: 'Классическая сорочка / блуза + тонкий кардиган или пиджак',
+                detail: 'Сдержанный деловой верх, в котором комфортно и на улице, и в кабинете.',
+              },
+        };
+        baseTop = map[style] || map.casual;
       } else if (effectiveTemp <= 13) {
-        if (isEn) {
-          baseTop = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: hasBigSwing ? 'T-shirt + light sweatshirt or zip hoodie' : 'Long-sleeve tee or tee under an open shirt',
+                detail: 'Flexible layering so you can adapt quickly between sun and shade.',
+              }
+            : {
+                title: hasBigSwing ? 'Футболка + лёгкий свитшот или худи' : 'Лонгслив или футболка под расстёгнутую рубашку',
+                detail: 'Гибкий вариант, чтобы легко подстраиваться под солнце и тень.',
+              },
+          smart: isEn
             ? {
                 title: 'Oxford button-down or long-sleeve knit polo',
                 detail: hasBigSwing
@@ -1886,76 +2029,134 @@
                   : 'Breathable, structured layer suited for mild weather.',
               }
             : {
-                title: hasBigSwing ? 'T-shirt + light sweatshirt or zip hoodie' : 'Long-sleeve tee or tee under an open shirt',
-                detail: 'Flexible layering so you can adapt quickly between sun and shade.',
-              };
-        } else {
-          baseTop = isSmart
-            ? {
                 title: 'Рубашка из оксфорда или трикотажное поло с длинным рукавом',
                 detail: hasBigSwing
                   ? 'Добавь тонкий джемпер на плечи на случай вечерней прохлады.'
                   : 'Дышащий слой для комфортной температуры.',
-              }
-            : {
-                title: hasBigSwing ? 'Футболка + лёгкий свитшот или худи' : 'Лонгслив или футболка под расстёгнутую рубашку',
-                detail: 'Гибкий вариант, чтобы легко подстраиваться под солнце и тень.',
-              };
-        }
-      } else if (effectiveTemp <= 21) {
-        if (isEn) {
-          baseTop = isSmart
+              },
+          sport: isEn
             ? {
-                title: 'Crisp cotton shirt or knit polo',
-                detail: 'Clean, put-together look tailored for mild sunny weather.',
+                title: hasBigSwing ? 'Breathable tech tee + light zip hoodie' : 'Seamless long-sleeve athletic top',
+                detail: 'Lightweight stretch fabric regulates body temperature on the move.',
               }
             : {
+                title: hasBigSwing ? 'Спортивная футболка + лёгкая олимпийка' : 'Дышащий спортивный лонгслив',
+                detail: 'Эластичная технологичная ткань поддерживает комфортный микроклимат.',
+              },
+          classic: isEn
+            ? {
+                title: 'Tailored cotton shirt, silk blouse, or fine turtleneck',
+                detail: hasBigSwing
+                  ? 'Pair with a lightweight blazer you can remove during the warm midday.'
+                  : 'Crisp collar and clean lines suited for formal daytime plans.',
+              }
+            : {
+                title: 'Классическая рубашка, блуза или тонкая водолазка',
+                detail: hasBigSwing
+                  ? 'Дополни лёгким пиджаком или жакетом на прохладное утро и вечер.'
+                  : 'Аккуратный силуэт и натуральная дышащая ткань.',
+              },
+        };
+        baseTop = map[style] || map.casual;
+      } else if (effectiveTemp <= 21) {
+        const map = {
+          casual: isEn
+            ? {
                 title: 'Essential heavyweight cotton t-shirt',
                 detail: hasBigSwing
                   ? 'Keep a light sweatshirt or overshirt handy for after sunset.'
                   : 'Breathable 180–220 gsm cotton keeps its shape all day.',
-              };
-        } else {
-          baseTop = isSmart
-            ? {
-                title: 'Хлопковая рубашка или трикотажное поло',
-                detail: 'Свежий и собранный образ для тёплой погоды.',
               }
             : {
                 title: 'Базовая хлопковая футболка',
                 detail: hasBigSwing
                   ? 'Возьми с собой лёгкую толстовку или рубашку на вечер.'
                   : 'Оптимальная плотность хлопка 180–220 г/м².',
-              };
-        }
+              },
+          smart: isEn
+            ? {
+                title: 'Crisp cotton shirt or knit polo',
+                detail: 'Clean, put-together look tailored for mild sunny weather.',
+              }
+            : {
+                title: 'Хлопковая рубашка или трикотажное поло',
+                detail: 'Свежий и собранный образ для тёплой погоды.',
+              },
+          sport: isEn
+            ? {
+                title: 'Dry-fit athletic t-shirt or breathable training top',
+                detail: 'Quick-drying mesh panels keep you cool in direct sunshine.',
+              }
+            : {
+                title: 'Дышащая спортивная футболка (Dry-Fit / микрофибра)',
+                detail: 'Быстро отводит тепло и не липнет к телу на солнце.',
+              },
+          classic: isEn
+            ? {
+                title: 'Poplin dress shirt, lightweight blouse, or fine-knit polo',
+                detail: 'Breathable natural cotton or silk blend with an effortlessly neat drape.',
+              }
+            : {
+                title: 'Сорочка из поплина, лёгкая блуза или классическое поло',
+                detail: 'Натуральный дышащий хлопок с аккуратной посадкой.',
+              },
+        };
+        baseTop = map[style] || map.casual;
       } else {
-        if (isEn) {
-          baseTop = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Relaxed lightweight cotton or linen tee',
+                detail: 'Maximum airflow on a hot day.',
+              }
+            : {
+                title: 'Свободная футболка из лёгкого хлопка или льна',
+                detail: 'Максимальная вентиляция в жаркий день.',
+              },
+          smart: isEn
             ? {
                 title: 'Linen shirt or airy short-sleeve knit polo',
                 detail: 'Light tones and natural weaves prevent overheating.',
               }
             : {
-                title: 'Relaxed lightweight cotton or linen tee',
-                detail: 'Maximum airflow on a hot day.',
-              };
-        } else {
-          baseTop = isSmart
-            ? {
                 title: 'Льняная рубашка или лёгкое дышащее поло',
                 detail: 'Светлые оттенки и натуральные ткани спасут от перегрева.',
+              },
+          sport: isEn
+            ? {
+                title: 'Ultralight running singlet or perforated mesh tee',
+                detail: 'Engineered for high heat with maximum ventilation.',
               }
             : {
-                title: 'Свободная футболка из лёгкого хлопка или льна',
-                detail: 'Максимальная вентиляция в жаркий день.',
-              };
-        }
+                title: 'Ультралёгкая спортивная футболка или майка с перфорацией',
+                detail: 'Максимальный теплоотвод в жаркую погоду.',
+              },
+          classic: isEn
+            ? {
+                title: 'Light-colored linen/cotton shirt or sleeveless silk blouse',
+                detail: 'Airy natural fabrics keep formal summer style cool and composed.',
+              }
+            : {
+                title: 'Светлая сорочка из тонкого льна/хлопка или лёгкая блуза',
+                detail: 'Воздушные натуральные ткани спасают от жары, сохраняя строгий вид.',
+              },
+        };
+        baseTop = map[style] || map.casual;
       }
 
-      // 3. ПОДБОР НИЗА
+      // 3. ПОДБОР НИЗА (по effectiveTemp и стилю)
       if (effectiveTemp <= -6) {
-        if (isEn) {
-          bottom = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: isCar ? 'Heavyweight raw denim jeans' : 'Fleece-lined jeans or thermal joggers',
+                detail: 'Shields knees and lower back from biting wind.',
+              }
+            : {
+                title: isCar ? 'Плотные джинсы из тяжёлого денима' : 'Утеплённые джинсы или джоггеры с начёсом',
+                detail: 'Защищают колени и поясницу от ледяного ветра.',
+              },
+          smart: isEn
             ? {
                 title: 'Heavy wool or flannel trousers',
                 detail: isCar
@@ -1963,208 +2164,372 @@
                   : 'Layer thin thermal leggings underneath for extended walks.',
               }
             : {
-                title: isCar ? 'Heavyweight raw denim jeans' : 'Fleece-lined jeans or thermal joggers',
-                detail: 'Shields knees and lower back from biting wind.',
-              };
-        } else {
-          bottom = isSmart
-            ? {
                 title: 'Плотные шерстяные брюки или фланель',
                 detail: isCar
                   ? 'В салоне комфортно, а при выходе на мороз ткань не продувается.'
                   : 'При долгой ходьбе лучше надеть под низ тонкие термокальсоны.',
+              },
+          sport: isEn
+            ? {
+                title: isCar ? 'Brushed-fleece athletic joggers' : 'Windproof winter training pants or thermal tights',
+                detail: 'Fleece interior locks in warmth while letting knees bend freely.',
               }
             : {
-                title: isCar ? 'Плотные джинсы из тяжёлого денима' : 'Утеплённые джинсы или джоггеры с начёсом',
-                detail: 'Защищают колени и поясницу от ледяного ветра.',
-              };
-        }
+                title: isCar ? 'Спортивные джоггеры с начёсом' : 'Утеплённые спортивные брюки или зимние тайтсы',
+                detail: 'Мягкий флис внутри греет, а плотный верх защищает от ветра.',
+              },
+          classic: isEn
+            ? {
+                title: 'Heavy wool-blend creased trousers or lined wool midi skirt',
+                detail: 'Dense suiting fabric keeps sharp creases and blocks winter chill.',
+              }
+            : {
+                title: 'Плотные костюмные брюки из шерсти или тёплая юбка-миди',
+                detail: 'Плотное плетение шерсти держит стрелки и защищает от мороза.',
+              },
+        };
+        bottom = map[style] || map.casual;
       } else if (effectiveTemp <= 14) {
-        if (isEn) {
-          bottom = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Straight-leg jeans or sturdy cargo pants',
+                detail: 'Durable denim that shrugs off wind and light street splash.',
+              }
+            : {
+                title: 'Прямые джинсы или плотные карго',
+                detail: 'Практичный деним, которому не страшны ни ветер, ни мелкие брызги.',
+              },
+          smart: isEn
             ? {
                 title: 'Tailored chinos or straight-leg trousers',
                 detail: 'Versatile pairing under a trench, blazer, or overcoat.',
               }
             : {
-                title: 'Straight-leg jeans or sturdy cargo pants',
-                detail: 'Durable denim that shrugs off wind and light street splash.',
-              };
-        } else {
-          bottom = isSmart
-            ? {
                 title: 'Брюки чинос или классические прямые брюки',
                 detail: 'Универсальный вариант под пальто, тренч или блейзер.',
+              },
+          sport: isEn
+            ? {
+                title: 'Tapered knit joggers or stretch track pants',
+                detail: 'Comfortable elastic waistband and clean cuff fit over sneakers.',
               }
             : {
-                title: 'Прямые джинсы или плотные карго',
-                detail: 'Практичный деним, которому не страшны ни ветер, ни мелкие брызги.',
-              };
-        }
+                title: 'Трикотажные джоггеры или эластичные спортивные брюки',
+                detail: 'Комфортная посадка, не сковывающая шаг и активные движения.',
+              },
+          classic: isEn
+            ? {
+                title: 'Tailored suit trousers or structured midi skirt',
+                detail: 'Timeless silhouette that pairs seamlessly with a blazer or trench.',
+              }
+            : {
+                title: 'Классические брюки со стрелками или юбка-миди',
+                detail: 'Строгий универсальный низ под пиджак, жакет или тренч.',
+              },
+        };
+        bottom = map[style] || map.casual;
       } else if (effectiveTemp <= 22) {
-        if (isEn) {
-          bottom = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Relaxed jeans or lightweight cotton trousers',
+                detail: 'Won’t overheat midday and still protects against evening breeze.',
+              }
+            : {
+                title: 'Свободные джинсы или лёгкие хлопковые брюки',
+                detail: 'Не парят днём и защищают от вечерней прохлады.',
+              },
+          smart: isEn
             ? {
                 title: 'Lightweight chinos or tropical-wool trousers',
                 detail: 'Stays breathable even in direct afternoon sunshine.',
               }
             : {
-                title: 'Relaxed jeans or lightweight cotton trousers',
-                detail: 'Won’t overheat midday and still protects against evening breeze.',
-              };
-        } else {
-          bottom = isSmart
-            ? {
                 title: 'Лёгкие чиносы или брюки из тонкой шерсти / хлопка',
                 detail: 'Комфортно даже на активном дневном солнце.',
+              },
+          sport: isEn
+            ? {
+                title: 'Lightweight woven athletic pants or training leggings',
+                detail: 'Breathable stretch fabric suited for mild, active days.',
               }
             : {
-                title: 'Свободные джинсы или лёгкие хлопковые брюки',
-                detail: 'Не парят днём и защищают от вечерней прохлады.',
-              };
-        }
+                title: 'Лёгкие спортивные брюки из плащёвки/трикотажа или леггинсы',
+                detail: 'Дышащая эластичная ткань для активного дня без перегрева.',
+              },
+          classic: isEn
+            ? {
+                title: 'Lightweight wool-blend trousers or flowing pleated midi skirt',
+                detail: 'Breathes comfortably in afternoon sun while keeping formal poise.',
+              }
+            : {
+                title: 'Лёгкие костюмные брюки или летящая юбка-миди',
+                detail: 'Не парят на дневном солнце и сохраняют элегантный силуэт.',
+              },
+        };
+        bottom = map[style] || map.casual;
       } else {
-        if (isEn) {
-          bottom = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Shorts or ultra-light relaxed trousers',
+                detail: 'Best pick for heat above +23°C.',
+              }
+            : {
+                title: 'Шорты или ультралёгкие брюки свободного кроя',
+                detail: 'Лучший выбор для жары выше +23°C.',
+              },
+          smart: isEn
             ? {
                 title: 'Linen trousers or tailored bermuda shorts',
                 detail: 'Breezy, fluid fabric keeps you cool with every step.',
               }
             : {
-                title: 'Shorts or ultra-light relaxed trousers',
-                detail: 'Best pick for heat above +23°C.',
-              };
-        } else {
-          bottom = isSmart
-            ? {
                 title: 'Льняные брюки или строгие бермуды',
                 detail: 'Лёгкая струящаяся ткань даёт прохладу при каждом шаге.',
+              },
+          sport: isEn
+            ? {
+                title: 'Breathable running shorts or athletic bike shorts',
+                detail: 'Featherweight moisture-wicking fabric built for peak heat.',
               }
             : {
-                title: 'Шорты или ультралёгкие брюки свободного кроя',
-                detail: 'Лучший выбор для жары выше +23°C.',
-              };
-        }
+                title: 'Лёгкие спортивные шорты или велосипедки',
+                detail: 'Невесомая дышащая ткань для максимального комфорта в жару.',
+              },
+          classic: isEn
+            ? {
+                title: 'Breezy linen-cotton dress trousers or airy midi skirt',
+                detail: 'Light-colored, breathable tailoring that respects summer dress codes.',
+              }
+            : {
+                title: 'Светлые классические брюки из льна/хлопка или лёгкая юбка',
+                detail: 'Воздушная натуральная ткань, уместная даже при строгом дресс-коде.',
+              },
+        };
+        bottom = map[style] || map.casual;
       }
 
-      // 4. ПОДБОР ОБУВИ
+      // 4. ПОДБОР ОБУВИ (по погоде и стилю)
       if (hasSnow || effectiveTemp <= -3) {
-        if (isEn) {
-          shoes = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Winter boots or insulated high-top sneakers',
+                detail: 'Thick outsoles insulate your feet from frozen pavement.',
+              }
+            : {
+                title: 'Зимние ботинки или утеплённые высокие кроссовки',
+                detail: 'Толстая подошва изолирует стопу от холодного асфальта.',
+              },
+          smart: isEn
             ? {
                 title: 'Insulated leather Chelsea boots with lug soles',
                 detail: 'Treat leather with a water-repellent spray before heading out.',
               }
             : {
-                title: 'Winter boots or insulated high-top sneakers',
-                detail: 'Thick outsoles insulate your feet from frozen pavement.',
-              };
-        } else {
-          shoes = isSmart
-            ? {
                 title: 'Утеплённые кожаные челси или ботинки на протекторе',
                 detail: 'Обработай кожу водоотталкивающей пропиткой перед выходом.',
+              },
+          sport: isEn
+            ? {
+                title: 'Insulated winter trail sneakers with grippy tread',
+                detail: 'Thermal lining and high-traction outsoles handle snow and slush.',
               }
             : {
-                title: 'Зимние ботинки или утеплённые высокие кроссовки',
-                detail: 'Толстая подошва изолирует стопу от холодного асфальта.',
-              };
-        }
+                title: 'Утеплённые зимние кроссовки с цепким протектором',
+                detail: 'Тёплая подкладка и рельефная подошва уверенно держат на снегу.',
+              },
+          classic: isEn
+            ? {
+                title: 'Fur-lined leather dress boots or sleek winter ankle boots',
+                detail: 'Smooth polished leather with a subtle non-slip sole.',
+              }
+            : {
+                title: 'Утеплённые кожаные ботинки или классические ботильоны',
+                detail: 'Гладкая кожа и аккуратная нескользящая подошва.',
+              },
+        };
+        shoes = map[style] || map.casual;
       } else if (hasRain) {
-        if (isEn) {
-          shoes = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Leather sneakers or Gore-Tex trail shoes',
+                detail: 'Keeps your socks dry when navigating wet sidewalks and puddles.',
+              }
+            : {
+                title: 'Кожаные кроссовки или ботинки с мембраной',
+                detail: 'Ноги останутся сухими, даже если придётся обходить лужи.',
+              },
+          smart: isEn
             ? {
                 title: 'Leather Chelsea boots or rubber-soled derbies',
                 detail: 'Leave suede and canvas pairs at home today.',
               }
             : {
-                title: 'Leather sneakers or Gore-Tex trail shoes',
-                detail: 'Keeps your socks dry when navigating wet sidewalks and puddles.',
-              };
-        } else {
-          shoes = isSmart
-            ? {
                 title: 'Кожаные челси или дерби на резиновой подошве',
                 detail: 'Замшу и текстиль сегодня лучше оставить дома.',
+              },
+          sport: isEn
+            ? {
+                title: 'Waterproof Gore-Tex running or outdoor sneakers',
+                detail: 'Repels rain splashes while keeping cushioned support.',
               }
             : {
-                title: 'Кожаные кроссовки или ботинки с мембраной',
-                detail: 'Ноги останутся сухими, даже если придётся обходить лужи.',
-              };
-        }
+                title: 'Непромокаемые кроссовки с мембраной (Gore-Tex)',
+                detail: 'Защищают от луж и брызг, сохраняя лёгкость и амортизацию.',
+              },
+          classic: isEn
+            ? {
+                title: 'Polished leather derbies, Chelsea boots, or block-heel ankle boots',
+                detail: 'Stick to smooth treated leather and skip delicate suede in the rain.',
+              }
+            : {
+                title: 'Кожаные дерби, челси или закрытые ботильоны на устойчивом каблуке',
+                detail: 'Выбирай гладкую обработанную кожу — замшу в дождь лучше поберечь.',
+              },
+        };
+        shoes = map[style] || map.casual;
       } else if (effectiveTemp <= 13) {
-        if (isEn) {
-          shoes = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Leather or sturdy suede sneakers',
+                detail: 'Blocks cool breezes and pairs cleanly with any top layer.',
+              }
+            : {
+                title: 'Кожаные или плотные замшевые кроссовки',
+                detail: 'Не продуваются на ветру и подходят под любой верх.',
+              },
+          smart: isEn
             ? {
                 title: 'Chelsea boots, desert boots, or loafers with crew socks',
                 detail: 'Understated smart staple for dry transitional weather.',
               }
             : {
-                title: 'Leather or sturdy suede sneakers',
-                detail: 'Blocks cool breezes and pairs cleanly with any top layer.',
-              };
-        } else {
-          shoes = isSmart
-            ? {
                 title: 'Челси, дезерты или кожаные лоферы (с высокими носками)',
                 detail: 'Сдержанная классика для сухого межсезонья.',
+              },
+          sport: isEn
+            ? {
+                title: 'Cushioned everyday running or training sneakers',
+                detail: 'Supportive midsole built for high step counts around town.',
               }
             : {
-                title: 'Кожаные или плотные замшевые кроссовки',
-                detail: 'Не продуваются на ветру и подходят под любой верх.',
-              };
-        }
+                title: 'Амортизирующие беговые или тренировочные кроссовки',
+                detail: 'Комфортная поддержка стопы для активного ритма и долгих прогулок.',
+              },
+          classic: isEn
+            ? {
+                title: 'Leather oxfords, derbies, loafers, or sleek ankle boots',
+                detail: 'Clean, polished footwear that anchors a formal silhouette.',
+              }
+            : {
+                title: 'Кожаные оксфорды, дерби, лоферы или аккуратные ботильоны',
+                detail: 'Безупречная классическая пара, завершающая деловой образ.',
+              },
+        };
+        shoes = map[style] || map.casual;
       } else if (effectiveTemp <= 22) {
-        if (isEn) {
-          shoes = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Classic canvas sneakers or everyday runners',
+                detail: 'Light and cushioned for long walks around town.',
+              }
+            : {
+                title: 'Классические кеды или беговые кроссовки',
+                detail: 'Лёгкие и удобные для долгих прогулок по городу.',
+              },
+          smart: isEn
             ? {
                 title: 'Loafers, monk straps, or minimalist leather sneakers',
                 detail: 'Effortless footwear for dry spring or autumn days.',
               }
             : {
-                title: 'Classic canvas sneakers or everyday runners',
-                detail: 'Light and cushioned for long walks around town.',
-              };
-        } else {
-          shoes = isSmart
-            ? {
                 title: 'Лоферы, монки или минималистичные кожаные кеды',
                 detail: 'Лёгкая пара для сухой весенне-осенней погоды.',
+              },
+          sport: isEn
+            ? {
+                title: 'Breathable knit runners or lightweight trainers',
+                detail: 'Featherweight comfort for workouts, walks, and errands.',
               }
             : {
-                title: 'Классические кеды или беговые кроссовки',
-                detail: 'Лёгкие и удобные для долгих прогулок по городу.',
-              };
-        }
+                title: 'Лёгкие дышащие кроссовки с текстильным верхом',
+                detail: 'Невесомая пара для прогулок, пробежек и активных дел.',
+              },
+          classic: isEn
+            ? {
+                title: 'Leather loafers, brogues, or classic low-heel pumps/flats',
+                detail: 'Timeless formal footwear suited for dry sunny days.',
+              }
+            : {
+                title: 'Кожаные лоферы, броги или классические туфли / балетки',
+                detail: 'Элегантная пара для сухой солнечной погоды.',
+              },
+        };
+        shoes = map[style] || map.casual;
       } else {
-        if (isEn) {
-          shoes = isSmart
+        const map = {
+          casual: isEn
+            ? {
+                title: 'Mesh runners, lightweight canvas sneakers, or sandals',
+                detail: 'Maximum ventilation to keep your feet cool.',
+              }
+            : {
+                title: 'Сетчатые кроссовки, лёгкие кеды или сандалии',
+                detail: 'Максимальный воздухообмен для стоп.',
+              },
+          smart: isEn
             ? {
                 title: 'Suede loafers or woven espadrilles',
                 detail: 'Breathable elegance built for warm weather.',
               }
             : {
-                title: 'Mesh runners, lightweight canvas sneakers, or sandals',
-                detail: 'Maximum ventilation to keep your feet cool.',
-              };
-        } else {
-          shoes = isSmart
-            ? {
                 title: 'Замшевые лоферы или лёгкие эспадрильи',
                 detail: 'Дышащая обувь для жаркого дня.',
+              },
+          sport: isEn
+            ? {
+                title: 'Ultralight ventilated running shoes or sport slides',
+                detail: 'Open-mesh upper lets heat escape immediately.',
               }
             : {
-                title: 'Сетчатые кроссовки, лёгкие кеды или сандалии',
-                detail: 'Максимальный воздухообмен для стоп.',
-              };
-        }
+                title: 'Ультралёгкие беговые кроссовки в сетку',
+                detail: 'Максимальная вентиляция стопы даже в сильный зной.',
+              },
+          classic: isEn
+            ? {
+                title: 'Unlined suede loafers or open-heel slingbacks/sandals',
+                detail: 'Refined summer footwear that stays light and breathable.',
+              }
+            : {
+                title: 'Лёгкие замшевые лоферы или классические босоножки / слингбэки',
+                detail: 'Сдержанная летняя классика, в которой ногам не жарко.',
+              },
+        };
+        shoes = map[style] || map.casual;
       }
 
-      // 5. АКСЕССУАРЫ И ДЕТАЛИ (динамические бейджи)
+      // 5. АКСЕССУАРЫ И ДЕТАЛИ (динамические бейджи с учётом стиля)
       if (hasRain) {
         accessories.push({
           icon: '☂️',
-          text: isEn ? 'Compact umbrella' : 'Компактный зонт',
+          text:
+            style === 'classic'
+              ? isEn
+                ? 'Classic stick or compact umbrella'
+                : 'Классический зонт'
+              : style === 'sport'
+              ? isEn
+                ? 'Waterproof cap or storm hood'
+                : 'Непромокаемая кепка / капюшон'
+              : isEn
+              ? 'Compact umbrella'
+              : 'Компактный зонт',
           tone: 'bg-blue-500/25 text-blue-100 border-blue-400/35',
         });
         accessories.push({
@@ -2176,18 +2541,47 @@
       if (effectiveTemp <= 0 || hasSnow) {
         accessories.push({
           icon: '🧣',
-          text: isEn ? 'Warm scarf' : 'Тёплый шарф',
+          text:
+            style === 'sport'
+              ? isEn
+                ? 'Fleece neck gaiter / buff'
+                : 'Флисовый бафф / снуд'
+              : style === 'classic'
+              ? isEn
+                ? 'Cashmere or wool scarf'
+                : 'Кашемировый или шерстяной шарф'
+              : isEn
+              ? 'Warm scarf'
+              : 'Тёплый шарф',
           tone: 'bg-indigo-500/25 text-indigo-100 border-indigo-400/35',
         });
         accessories.push({
           icon: '🧤',
-          text: isEn ? 'Gloves' : 'Перчатки',
+          text:
+            style === 'sport'
+              ? isEn
+                ? 'Thermal running gloves'
+                : 'Спортивные термоперчатки'
+              : style === 'classic'
+              ? isEn
+                ? 'Leather gloves'
+                : 'Кожаные перчатки'
+              : isEn
+              ? 'Gloves'
+              : 'Перчатки',
           tone: 'bg-violet-500/25 text-violet-100 border-violet-400/35',
         });
       } else if (effectiveTemp <= 6 && isWindy) {
         accessories.push({
           icon: '🧣',
-          text: isEn ? 'Light wind scarf' : 'Лёгкий шарф от ветра',
+          text:
+            style === 'sport'
+              ? isEn
+                ? 'Lightweight neck buff'
+                : 'Лёгкий бафф от ветра'
+              : isEn
+              ? 'Light wind scarf'
+              : 'Лёгкий шарф от ветра',
           tone: 'bg-indigo-500/20 text-indigo-100 border-indigo-400/30',
         });
       }
@@ -2195,7 +2589,14 @@
       if (effectiveTemp <= -2 && !isCar) {
         accessories.push({
           icon: '🧢',
-          text: isEn ? 'Warm beanie' : 'Шапка / бини',
+          text:
+            style === 'sport'
+              ? isEn
+                ? 'Thermal athletic beanie'
+                : 'Спортивная термошапка'
+              : isEn
+              ? 'Warm beanie'
+              : 'Шапка / бини',
           tone: 'bg-sky-500/25 text-sky-100 border-sky-400/35',
         });
       }
@@ -2222,6 +2623,13 @@
           text: isEn ? 'Sunglasses' : 'Солнцезащитные очки',
           tone: 'bg-amber-400/25 text-amber-100 border-amber-300/35',
         });
+        if (style === 'sport' && weather.temp >= 20) {
+          accessories.push({
+            icon: '🧢',
+            text: isEn ? 'Breathable running cap' : 'Лёгкая спортивная кепка',
+            tone: 'bg-sky-400/20 text-sky-100 border-sky-300/30',
+          });
+        }
       }
 
       if (accessories.length === 0) {
@@ -2288,11 +2696,23 @@
           );
         }
 
-        if (isCar) {
+        if (style === 'sport') {
+          verdictSentences.push(
+            isCar
+              ? `Styled in an athletic look with breathable stretch fabrics — light behind the wheel and ready for a walk or workout.`
+              : `Curated in sporty performance layers for unrestricted movement, breathability, and active comfort.`
+          );
+        } else if (style === 'classic') {
+          verdictSentences.push(
+            isCar
+              ? `Tailored in timeless classic style with a drive-friendly outer layer that keeps sharp lines from car to office.`
+              : `Curated in clean, classic tailoring with refined fabrics suited for business meetings, the office, or formal plans.`
+          );
+        } else if (isCar) {
           verdictSentences.push(
             `Since you're driving, we dialed back the outerwear weight so you won't overheat in the cabin while staying warm on short walks.`
           );
-        } else if (isSmart) {
+        } else if (style === 'smart') {
           verdictSentences.push(
             `Curated in a smart-casual aesthetic so your layers pair effortlessly for meetings or office hours.`
           );
@@ -2342,11 +2762,23 @@
           );
         }
 
-        if (isCar) {
+        if (style === 'sport') {
+          verdictSentences.push(
+            isCar
+              ? `Образ выдержан в спортивном стиле: дышащие эластичные ткани не парят за рулём и готовы к активной прогулке или тренировке.`
+              : `Комплект собран в спортивном стиле — технологичные дышащие материалы, полная свобода движений и защита от погоды.`
+          );
+        } else if (style === 'classic') {
+          verdictSentences.push(
+            isCar
+              ? `Образ собран в строгой классике: укороченный верх удобен за рулём и сохраняет безупречный силуэт по пути в офис или на встречу.`
+              : `Комплект выдержан в элегантной классике — благородные ткани и выверенный силуэт для деловых встреч, офиса или выхода в свет.`
+          );
+        } else if (isCar) {
           verdictSentences.push(
             `Поскольку ты на машине, верхнюю одежду облегчили — в салоне не придётся париться, а для коротких перебежек тепла хватит.`
           );
-        } else if (isSmart) {
+        } else if (style === 'smart') {
           verdictSentences.push(
             `Образ собран в эстетике смарт-кэжуал: вещи легко комбинируются между собой и уместно выглядят на встрече или в офисе.`
           );
@@ -2709,6 +3141,8 @@
       setText('styleSectionLabel', tr.styleLabel);
       setText('styleCasualBtn', tr.styleCasual);
       setText('styleSmartBtn', tr.styleSmart);
+      setText('styleSportBtn', tr.styleSport);
+      setText('styleClassicBtn', tr.styleClassic);
 
       setText('thermalSectionLabel', tr.thermalLabel);
       setText('thermalColdBtn', tr.thermalCold);
