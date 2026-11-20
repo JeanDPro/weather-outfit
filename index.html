@@ -263,13 +263,15 @@
       border-radius: 9999px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 9999px;
-    }
-
-    /* Скрываем возможный внешний бейдж Powered by Netlify */
+    /* Скрываем возможный внешний бейдж Powered by Netlify и его iframe */
     [class*="netlify-badge"],
     [id*="netlify-badge"],
+    [class*="nl-badge"],
+    [id*="nl-badge"],
+    .nl-wrap,
+    iframe[id*="nl-badge"],
+    iframe[name*="nl-badge"],
+    iframe[src*="nl-badge"],
     a[href*="netlify.com"][style*="position: fixed"],
     a[href*="netlify.app"][style*="position: fixed"] {
       display: none !important;
@@ -3299,15 +3301,20 @@
 
       // Отслеживаем появление внешнего бейджа Netlify в DOM и прячем его
       const hideNetlifyBadge = () => {
-        document.querySelectorAll('a, div, button').forEach((el) => {
+        document.querySelectorAll('a, div, button, iframe').forEach((el) => {
           if (el.closest('#toastNotification') || el.closest('.max-w-6xl')) return;
           const text = (el.textContent || '').trim();
+          const marker = `${el.id || ''} ${el.className || ''} ${el.name || ''} ${el.src || ''}`;
           const style = window.getComputedStyle(el);
           const isFixedCorner =
             style.position === 'fixed' &&
-            parseFloat(style.bottom || '999') < 90 &&
-            parseFloat(style.right || '999') < 90;
-          if (/powered by netlify/i.test(text) || (isFixedCorner && /netlify/i.test(text))) {
+            parseFloat(style.bottom || '999') < 110 &&
+            parseFloat(style.right || '999') < 140;
+          if (
+            /powered by netlify/i.test(text) ||
+            /nl-badge/i.test(marker) ||
+            (isFixedCorner && (/netlify/i.test(text) || /nl-badge/i.test(marker) || el.tagName === 'IFRAME'))
+          ) {
             el.style.setProperty('display', 'none', 'important');
           }
         });
