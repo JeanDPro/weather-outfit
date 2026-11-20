@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" id="themeColorMeta" content="#0f172a" />
+  <meta name="description" content="WearCast — умный погодный стилист и подбор образа на каждый день по реальной погоде, стилю, теплоощущению и транспорту. Smart daily weather & outfit stylist." />
+  <meta name="keywords" content="WearCast, wearcast.online, что надеть, погода и одежда, умный гардероб, what to wear, weather outfit stylist" />
   <title>WearCast — Умный погодный стилист</title>
   <!-- Подключаем шрифт Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -263,6 +265,17 @@
     .custom-scroll::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.25);
       border-radius: 9999px;
+    }
+
+    /* Скрываем возможный внешний бейдж Powered by Netlify */
+    [class*="netlify-badge"],
+    [id*="netlify-badge"],
+    a[href*="netlify.com"][style*="position: fixed"],
+    a[href*="netlify.app"][style*="position: fixed"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
   </style>
 </head>
@@ -3283,6 +3296,25 @@
 
       // Первый запуск: загружаем реальную погоду для сохранённого города (или Кишинёва)
       fetchWeatherForCity(state.city);
+
+      // Отслеживаем появление внешнего бейджа Netlify в DOM и прячем его
+      const hideNetlifyBadge = () => {
+        document.querySelectorAll('a, div, button').forEach((el) => {
+          if (el.closest('#toastNotification') || el.closest('.max-w-6xl')) return;
+          const text = (el.textContent || '').trim();
+          const style = window.getComputedStyle(el);
+          const isFixedCorner =
+            style.position === 'fixed' &&
+            parseFloat(style.bottom || '999') < 90 &&
+            parseFloat(style.right || '999') < 90;
+          if (/powered by netlify/i.test(text) || (isFixedCorner && /netlify/i.test(text))) {
+            el.style.setProperty('display', 'none', 'important');
+          }
+        });
+      };
+      hideNetlifyBadge();
+      const badgeObserver = new MutationObserver(hideNetlifyBadge);
+      badgeObserver.observe(document.body, { childList: true, subtree: true });
     });
   </script>
 </body>
