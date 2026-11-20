@@ -263,6 +263,13 @@
       border-radius: 9999px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
     /* Скрываем возможный внешний бейдж Powered by Netlify и его iframe */
     [class*="netlify-badge"],
     [id*="netlify-badge"],
@@ -647,58 +654,92 @@
           </div>
         </section>
 
+        <!-- Блок «По часам» (до конца дня) -->
+        <section class="glass-card glass-card-hover rounded-3xl p-5">
+          <div class="flex items-center justify-between gap-2 mb-3.5">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h4l3-8 4 16 3-8h4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span id="hourlyHeading">По часам</span>
+            </h3>
+            <span id="hourlyRangeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-sky-200 border border-white/10 font-mono">
+              До 00:00
+            </span>
+          </div>
+
+          <div
+            id="hourlyForecastStrip"
+            class="flex items-stretch gap-2 overflow-x-auto pb-2 custom-scroll snap-x snap-mandatory"
+          >
+            <!-- Почасовые карточки заполняются через JS -->
+          </div>
+        </section>
+
       </div>
 
-      <!-- ПРАВАЯ КОЛОНКА: ВЕРДИКТ + ГАРДЕРОБ + АКСЕССУАРЫ (7/12) -->
+      <!-- ПРАВАЯ КОЛОНКА: ВЕРДИКТ СТИЛИСТА, ГАРДЕРОБ 2x2 И КОПИРОВАНИЕ (7/12) -->
       <div class="lg:col-span-7 flex flex-col gap-5">
-        
-        <!-- Главная карточка «Вердикт на сегодня» -->
+
+        <!-- Карточка вердикта стилиста и аксессуаров -->
         <section class="glass-card glass-card-hover rounded-3xl p-5 sm:p-6 relative overflow-hidden">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 border border-sky-400/30">
-              <span class="text-sm">✨</span>
-              <span id="verdictHeading" class="text-xs font-bold uppercase tracking-wider text-sky-200">Вердикт на сегодня</span>
+          <div class="flex flex-wrap items-center justify-between gap-2.5 mb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-amber-400/25 to-sky-500/25 border border-white/20 flex items-center justify-center text-amber-300 shrink-0">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3Z"/>
+                </svg>
+              </div>
+              <h3 id="verdictHeading" class="text-lg sm:text-xl font-extrabold text-white tracking-tight">
+                Вердикт на сегодня
+              </h3>
             </div>
-            <span id="effectiveTempTag" class="text-xs font-medium text-slate-300 font-mono">
+
+            <span
+              id="effectiveTempTag"
+              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-100 border border-sky-400/30 font-mono"
+            >
               Расчёт по ощущению: +10°C
             </span>
           </div>
 
-          <p id="verdictText" class="text-base sm:text-lg font-medium text-white leading-relaxed">
-            Анализируем погоду и подбираем оптимальные слои одежды...
+          <p id="verdictText" class="text-sm sm:text-base text-slate-100 leading-relaxed">
+            Подбираем оптимальный комплект одежды под текущую погоду...
           </p>
 
-          <!-- Полоса «Аксессуары и детали» -->
+          <!-- Аксессуары и детали -->
           <div class="mt-4 pt-4 border-t border-white/10">
-            <div id="accessoriesSectionLabel" class="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2.5">Аксессуары и детали</div>
+            <div id="accessoriesSectionLabel" class="text-[11px] uppercase tracking-wider font-bold text-slate-300 mb-2.5">
+              Аксессуары и детали
+            </div>
             <div id="accessoriesList" class="flex flex-wrap gap-2">
-              <!-- Бейджи аксессуаров через JS -->
+              <!-- Бейджи аксессуаров заполняются через JS -->
             </div>
           </div>
         </section>
 
-        <!-- Сетка гардероба 2×2 -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="wardrobeGrid">
-          <!-- 4 карточки гардероба генерируются через JS -->
+        <!-- Сетка гардероба 2x2 -->
+        <section id="wardrobeGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Карточки одежды заполняются через JS -->
         </section>
 
-        <!-- Панель действий: Скопировать образ -->
-        <div class="glass-card rounded-3xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div id="copyHelperText" class="text-xs sm:text-sm text-slate-300 text-center sm:text-left">
+        <!-- Блок быстрого копирования образа -->
+        <section class="glass-card rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+          <p id="copyHelperText" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
             Собираетесь выходить или обсуждаете планы с друзьями? Отправьте готовый чек-лист в один клик.
-          </div>
+          </p>
           <button
             id="copyOutfitBtn"
             type="button"
-            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 active:scale-[0.98] text-sm font-bold text-white shadow-lg shadow-sky-500/25 border border-white/20 transition shrink-0"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-sky-50 active:scale-95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg shadow-slate-950/25 transition shrink-0"
           >
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <svg class="w-4 h-4 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
             </svg>
             <span id="copyOutfitBtnLabel">Скопировать образ</span>
           </button>
-        </div>
+        </section>
 
       </div>
     </main>
@@ -817,6 +858,10 @@
         sliceAfternoon: 'День 14:00',
         sliceEvening: 'Вечер 20:00',
         sliceFeels: 'Ощущ.',
+        hourlyHeading: 'По часам',
+        hourlyUntilMidnight: 'До 00:00',
+        hourlyDaySchedule: 'Ключевые часы',
+        hourlyNow: 'Сейчас',
         verdictToday: 'Вердикт на сегодня',
         verdictTomorrow: 'Вердикт на завтра',
         verdictFuture: (wd, dt) => `Вердикт на ${wd.toLowerCase()}, ${dt}`,
@@ -932,6 +977,10 @@
         sliceAfternoon: 'Afternoon 14:00',
         sliceEvening: 'Evening 20:00',
         sliceFeels: 'Feels',
+        hourlyHeading: 'Hourly',
+        hourlyUntilMidnight: 'Until 00:00',
+        hourlyDaySchedule: 'Key hours',
+        hourlyNow: 'Now',
         verdictToday: "Today's Verdict",
         verdictTomorrow: "Tomorrow's Verdict",
         verdictFuture: (wd, dt) => `Verdict for ${wd}, ${dt}`,
@@ -1043,8 +1092,52 @@
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
+
+        // Строим плавный почасовой ход на 00:00–00:00 из утренней, дневной и вечерней точек
+        const [mSlice, aSlice, eSlice] = dayCfg.slices;
+        const hourly = [];
+        for (let h = 0; h <= 24; h++) {
+          let interpTemp = aSlice.temp;
+          let interpApp = aSlice.apparent;
+          let slotRef = aSlice;
+
+          if (h <= 8) {
+            const k = h / 8;
+            interpTemp = Math.round((mSlice.temp - 2) * (1 - k) + mSlice.temp * k);
+            interpApp = Math.round((mSlice.apparent - 2) * (1 - k) + mSlice.apparent * k);
+            slotRef = mSlice;
+          } else if (h <= 14) {
+            const k = (h - 8) / 6;
+            interpTemp = Math.round(mSlice.temp * (1 - k) + aSlice.temp * k);
+            interpApp = Math.round(mSlice.apparent * (1 - k) + aSlice.apparent * k);
+            slotRef = h < 11 ? mSlice : aSlice;
+          } else if (h <= 20) {
+            const k = (h - 14) / 6;
+            interpTemp = Math.round(aSlice.temp * (1 - k) + eSlice.temp * k);
+            interpApp = Math.round(aSlice.apparent * (1 - k) + eSlice.apparent * k);
+            slotRef = h < 18 ? aSlice : eSlice;
+          } else {
+            const k = (h - 20) / 4;
+            interpTemp = Math.round(eSlice.temp * (1 - k) + (eSlice.temp - 2) * k);
+            interpApp = Math.round(eSlice.apparent * (1 - k) + (eSlice.apparent - 2) * k);
+            slotRef = eSlice;
+          }
+
+          hourly.push({
+            hour: h,
+            label: h === 24 ? '00:00' : `${String(h).padStart(2, '0')}:00`,
+            temp: interpTemp,
+            apparent: interpApp,
+            code: slotRef.code,
+            isDay: h >= 6 && h <= 19 ? 1 : 0,
+            precip: slotRef.precip,
+          });
+        }
+
         return {
           dateISO: `${yyyy}-${mm}-${dd}`,
+          currentHour: idx === 0 ? now.getHours() : 0,
+          hourly,
           ...dayCfg,
         };
       });
@@ -2389,7 +2482,11 @@
         const cur = json.current;
         const hourly = json.hourly;
         const daily = json.daily;
-        const nowHour = new Date().getHours();
+        const parsedCityHour =
+          cur && typeof cur.time === 'string' && cur.time.includes('T')
+            ? Number(cur.time.split('T')[1].split(':')[0])
+            : NaN;
+        const nowHour = Number.isFinite(parsedCityHour) ? parsedCityHour : new Date().getHours();
 
         const daysCount = Math.min(7, daily.time.length);
         const builtDays = [];
@@ -2415,6 +2512,24 @@
             };
           });
 
+          // Собираем почасовую расписку дня (до 00:00 следующего дня, если есть в массиве)
+          const maxHourOffset = baseHourIdx + 24 < hourly.time.length ? 24 : 23;
+          const dayHourly = [];
+          for (let h = 0; h <= maxHourOffset; h++) {
+            const idx = baseHourIdx + h;
+            dayHourly.push({
+              hour: h,
+              label: h === 24 ? '00:00' : `${String(h).padStart(2, '0')}:00`,
+              temp: Math.round(hourly.temperature_2m[idx] ?? daily.temperature_2m_max[d]),
+              apparent: Math.round(
+                hourly.apparent_temperature[idx] ?? daily.apparent_temperature_max[d]
+              ),
+              code: hourly.weather_code[idx] ?? daily.weather_code[d],
+              isDay: h >= 6 && h <= 19 ? 1 : 0,
+              precip: Math.round(hourly.precipitation_probability[idx] ?? 0),
+            });
+          }
+
           const isToday = d === 0;
           const dayPrecipMax = Math.round(daily.precipitation_probability_max[d] ?? 0);
           const todayPrecip = Math.round(
@@ -2423,6 +2538,8 @@
 
           builtDays.push({
             dateISO: daily.time[d],
+            currentHour: isToday ? nowHour : 0,
+            hourly: dayHourly,
             temp: Math.round(isToday ? cur.temperature_2m : daily.temperature_2m_max[d]),
             tempMax: Math.round(daily.temperature_2m_max[d]),
             tempMin: Math.round(daily.temperature_2m_min[d]),
@@ -2563,55 +2680,65 @@
     // Применение статических переводов ко всем элементам интерфейса
     function applyStaticTranslations() {
       const tr = t();
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      };
+
       document.documentElement.lang = state.lang;
       document.title = tr.pageTitle;
 
-      document.getElementById('brandTitle').textContent = tr.brandTitle;
-      document.getElementById('brandBadge').textContent = tr.brandBadge;
-      document.getElementById('brandSubtitle').textContent = tr.brandSubtitle;
+      setText('brandTitle', tr.brandTitle);
+      setText('brandBadge', tr.brandBadge);
+      setText('brandSubtitle', tr.brandSubtitle);
 
-      document.getElementById('geoBtnMobile').title = tr.geoTooltip;
-      document.getElementById('geoBtnMobileLabel').textContent = tr.geoBtn;
-      document.getElementById('geoBtnDesktop').title = tr.geoTooltip;
-      document.getElementById('geoBtnDesktopLabel').textContent = tr.geoBtn;
+      const geoMobile = document.getElementById('geoBtnMobile');
+      if (geoMobile) geoMobile.title = tr.geoTooltip;
+      setText('geoBtnMobileLabel', tr.geoBtn);
 
-      document.getElementById('citySearchInput').placeholder = tr.searchPlaceholder;
-      document.getElementById('clearSearchBtn').setAttribute('aria-label', tr.clearSearchAria);
-      document.getElementById('quickLabel').textContent = tr.quickLabel;
+      const geoDesktop = document.getElementById('geoBtnDesktop');
+      if (geoDesktop) geoDesktop.title = tr.geoTooltip;
+      setText('geoBtnDesktopLabel', tr.geoBtn);
 
-      document.getElementById('styleSectionLabel').textContent = tr.styleLabel;
-      document.getElementById('styleCasualBtn').textContent = tr.styleCasual;
-      document.getElementById('styleSmartBtn').textContent = tr.styleSmart;
+      const searchInput = document.getElementById('citySearchInput');
+      if (searchInput) searchInput.placeholder = tr.searchPlaceholder;
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.setAttribute('aria-label', tr.clearSearchAria);
+      setText('quickLabel', tr.quickLabel);
 
-      document.getElementById('thermalSectionLabel').textContent = tr.thermalLabel;
-      document.getElementById('thermalColdBtn').textContent = tr.thermalCold;
-      document.getElementById('thermalNormalBtn').textContent = tr.thermalNormal;
-      document.getElementById('thermalHotBtn').textContent = tr.thermalHot;
+      setText('styleSectionLabel', tr.styleLabel);
+      setText('styleCasualBtn', tr.styleCasual);
+      setText('styleSmartBtn', tr.styleSmart);
 
-      document.getElementById('transportSectionLabel').textContent = tr.transportLabel;
-      document.getElementById('transportWalkBtn').textContent = tr.transportWalk;
-      document.getElementById('transportCarBtn').textContent = tr.transportCar;
+      setText('thermalSectionLabel', tr.thermalLabel);
+      setText('thermalColdBtn', tr.thermalCold);
+      setText('thermalNormalBtn', tr.thermalNormal);
+      setText('thermalHotBtn', tr.thermalHot);
 
-      document.getElementById('weeklyHeading').textContent = tr.weeklyHeading;
-      document.getElementById('weeklySubtitle').textContent = tr.weeklySubtitle;
-      document.getElementById('backToTodayLabel').textContent = tr.backToToday;
+      setText('transportSectionLabel', tr.transportLabel);
+      setText('transportWalkBtn', tr.transportWalk);
+      setText('transportCarBtn', tr.transportCar);
 
-      document.getElementById('feelsLikePrefix').textContent = tr.feelsLike;
-      document.getElementById('windLabel').textContent = tr.wind;
-      document.getElementById('humidityLabel').textContent = tr.humidity;
-      document.getElementById('precipLabel').textContent = tr.precip;
+      setText('weeklyHeading', tr.weeklyHeading);
+      setText('weeklySubtitle', tr.weeklySubtitle);
+      setText('backToTodayLabel', tr.backToToday);
 
-      document.getElementById('daySliceHeading').textContent = tr.daySliceHeading;
-      document.getElementById('accessoriesSectionLabel').textContent = tr.accessoriesLabel;
-      document.getElementById('copyHelperText').textContent = tr.copyHelperText;
-      document.getElementById('copyOutfitBtnLabel').textContent = tr.copyBtn;
+      setText('feelsLikePrefix', tr.feelsLike);
+      setText('windLabel', tr.wind);
+      setText('humidityLabel', tr.humidity);
+      setText('precipLabel', tr.precip);
 
-      document.getElementById('simulatorHeading').textContent = tr.simulatorHeading;
-      document.getElementById('simulatorSubtitle').textContent = tr.simulatorSubtitle;
-      const isSimHidden = document.getElementById('simulatorPanel').classList.contains('hidden');
-      document.getElementById('toggleSimulatorLabel').textContent = isSimHidden
-        ? tr.openScenarios
-        : tr.hideScenarios;
+      setText('daySliceHeading', tr.daySliceHeading);
+      setText('hourlyHeading', tr.hourlyHeading);
+      setText('accessoriesSectionLabel', tr.accessoriesLabel);
+      setText('copyHelperText', tr.copyHelperText);
+      setText('copyOutfitBtnLabel', tr.copyBtn);
+
+      setText('simulatorHeading', tr.simulatorHeading);
+      setText('simulatorSubtitle', tr.simulatorSubtitle);
+      const simPanel = document.getElementById('simulatorPanel');
+      const isSimHidden = simPanel ? simPanel.classList.contains('hidden') : true;
+      setText('toggleSimulatorLabel', isSimHidden ? tr.openScenarios : tr.hideScenarios);
     }
 
     /**
@@ -2738,6 +2865,50 @@
               <div class="text-[11px] text-slate-400">${tr.sliceFeels} ${formatTemp(slice.apparent)}</div>
               <div class="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-sky-200">
                 💧 ${slice.precip}%
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      // Блок «По часам» (для сегодня — от текущего часа до 00:00; для будущих дней — ключевые точки)
+      const hourlyRangeBadge = document.getElementById('hourlyRangeBadge');
+      const hourlyStrip = document.getElementById('hourlyForecastStrip');
+      const allHours = Array.isArray(activeWeather.hourly) ? activeWeather.hourly : [];
+
+      let visibleHours = [];
+      if (dayIdx === 0) {
+        const startHour =
+          typeof activeWeather.currentHour === 'number'
+            ? activeWeather.currentHour
+            : new Date().getHours();
+        visibleHours = allHours.filter((item) => item.hour >= startHour);
+        hourlyRangeBadge.textContent = tr.hourlyUntilMidnight;
+      } else {
+        const keyHours = new Set([6, 9, 12, 15, 18, 21, 24]);
+        visibleHours = allHours.filter((item) => keyHours.has(item.hour));
+        hourlyRangeBadge.textContent = tr.hourlyDaySchedule;
+      }
+
+      hourlyStrip.innerHTML = visibleHours
+        .map((item, idx) => {
+          const isNowCard = dayIdx === 0 && idx === 0;
+          const timeText = isNowCard ? tr.hourlyNow : item.label;
+          return `
+            <div class="snap-start shrink-0 min-w-[74px] rounded-2xl p-2.5 flex flex-col items-center text-center border transition ${
+              isNowCard
+                ? 'bg-sky-500/22 border-sky-300/60 shadow-md shadow-sky-500/15'
+                : 'glass-subcard'
+            }">
+              <span class="text-[11px] font-bold ${isNowCard ? 'text-sky-200' : 'text-slate-300'} font-mono">
+                ${timeText}
+              </span>
+              <div class="my-1.5">${getWeatherSVG(item.code, item.isDay, 'w-8 h-8')}</div>
+              <div class="text-sm font-extrabold text-white font-mono">${formatTemp(item.temp)}</div>
+              <div class="mt-1 text-[10px] font-semibold ${
+                item.precip >= 30 ? 'text-sky-300' : 'text-slate-400'
+              }">
+                💧 ${item.precip}%
               </div>
             </div>
           `;
