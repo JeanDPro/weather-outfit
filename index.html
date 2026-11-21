@@ -912,7 +912,7 @@
         </div>
 
         <div id="simulatorPanel" class="hidden mt-4 pt-4 border-t border-white/10">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5" id="simulatorPresetsGrid"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2.5" id="simulatorPresetsGrid"></div>
         </div>
       </div>
     </footer>
@@ -973,6 +973,7 @@
       forecastBundle: null, // Полный прогноз на 7 дней + почасовой
       isSimulated: false,
       simulatedWeather: null,
+      activePresetId: null,
       simulatorOpen: false,
     };
 
@@ -1038,6 +1039,9 @@
         simSubtitle: 'Проверь, как стилист подбирает вещи в любую крайность',
         simOpen: 'Открыть сценарии',
         simClose: 'Скрыть сценарии',
+        simDefaultTitle: 'По умолчанию',
+        simDefaultSubtitle: 'Вернуть текущую реальную погоду',
+        simDefaultToast: 'Возвращена текущая реальная погода',
         geoLoading: 'Определяем...',
         geoSuccess: 'Местоположение определено',
         geoError: 'Не удалось получить геолокацию',
@@ -1107,6 +1111,9 @@
         simSubtitle: 'Test how the stylist adapts to any extreme weather',
         simOpen: 'Open scenarios',
         simClose: 'Hide scenarios',
+        simDefaultTitle: 'Default (Live)',
+        simDefaultSubtitle: 'Restore current live weather',
+        simDefaultToast: 'Restored current live weather',
         geoLoading: 'Locating...',
         geoSuccess: 'Location updated',
         geoError: 'Could not access location',
@@ -1527,181 +1534,965 @@
       const wardrobeLibrary = {
         casual: {
           arctic: {
-            outer: { ru: 'Длинный пуховик с капюшоном', en: 'Long hooded down parka', desc: { ru: 'Надёжная защита от ледяного ветра и мороза', en: 'Heavy insulation against freezing wind' } },
-            top: { ru: 'Плотный шерстяной свитер + термобельё', en: 'Heavy wool sweater + thermal base', desc: { ru: 'Двухслойное тепло без перегрева', en: 'Two-layer warmth without bulk' } },
-            bottom: { ru: 'Утеплённые джинсы или джоггеры на флисе', en: 'Fleece-lined jeans or warm joggers', desc: { ru: 'Не продуваются на улице', en: 'Wind-resistant thermal lining' } },
-            shoes: { ru: 'Зимние ботинки на меху с протектором', en: 'Shearling winter boots with grip', desc: { ru: 'Устойчивая подошва на гололёде', en: 'Traction sole for icy sidewalks' } },
+            outer: {
+              ru: 'Длинный пуховик с капюшоном',
+              en: 'Long hooded down parka',
+              desc: {
+                ru: 'Плотная ветронепродуваемая ткань и высокий воротник надёжно защищают от ледяного ветра. Длина ниже бедра сохраняет тепло даже при долгом ожидании на остановке.',
+                en: 'Windproof outer shell and a high storm collar block freezing gusts. The below-hip cut keeps your core warm even during long waits outdoors.',
+              },
+            },
+            top: {
+              ru: 'Плотный шерстяной свитер + термобельё',
+              en: 'Heavy wool sweater + thermal base',
+              desc: {
+                ru: 'Тонкое термобельё отводит влагу от тела, а объёмный свитер удерживает тёплый воздух. В таком сочетании комфортно и на морозе, и в отапливаемом помещении.',
+                en: 'A lightweight thermal base wicks away moisture while the chunky knit traps warm air. This pairing keeps you cozy outside without overheating indoors.',
+              },
+            },
+            bottom: {
+              ru: 'Утеплённые джинсы или джоггеры на флисе',
+              en: 'Fleece-lined jeans or warm joggers',
+              desc: {
+                ru: 'Мягкая флисовая подкладка внутри не даёт ногам промёрзнуть на сквозняке. При этом снаружи брюки выглядят как привычная повседневная база.',
+                en: 'A soft fleece interior shields your legs from biting drafts. On the outside, they keep the clean look of everyday casual pants.',
+              },
+            },
+            shoes: {
+              ru: 'Зимние ботинки на меху с протектором',
+              en: 'Shearling winter boots with grip',
+              desc: {
+                ru: 'Толстая резиновая подошва с глубоким рисунком не скользит на укатанном снегу и гололёде. Натуральный или плотный утеплитель сохранит стопы в тепле весь день.',
+                en: 'A thick lugged rubber sole prevents slipping on packed snow and ice. Dense insulation keeps your feet warm through hours of winter walking.',
+              },
+            },
           },
           freezing: {
-            outer: { ru: 'Тёплая парка или объёмный пуховик', en: 'Warm parka or puffer jacket', desc: { ru: 'Комфорт при минусовой температуре', en: 'Cozy protection below freezing' } },
-            top: { ru: 'Худи на флисе или плотный свитшот', en: 'Fleece hoodie or thick sweatshirt', desc: { ru: 'Мягкий средний слой на каждый день', en: 'Soft everyday mid-layer' } },
-            bottom: { ru: 'Плотные джинсы прямого кроя', en: 'Heavyweight straight-leg jeans', desc: { ru: 'Хлопок высокой плотности', en: 'High-density cotton denim' } },
-            shoes: { ru: 'Утеплённые ботинки или высокие кеды', en: 'Insulated boots or winter high-tops', desc: { ru: 'Тёплая стелька и защита от слякоти', en: 'Warm insole & slush protection' } },
+            outer: {
+              ru: 'Тёплая парка или объёмный пуховик',
+              en: 'Warm parka or puffer jacket',
+              desc: {
+                ru: 'Надёжный утеплитель и ветрозащитная планка на молнии обеспечивают полный комфорт при минусовой температуре. Капюшон выручит, если поднимется порывистый ветер.',
+                en: 'Quality insulation and a storm-flap zipper deliver solid comfort below freezing. The hood adds instant protection whenever gusts pick up.',
+              },
+            },
+            top: {
+              ru: 'Худи на флисе или плотный свитшот',
+              en: 'Fleece hoodie or thick sweatshirt',
+              desc: {
+                ru: 'Мягкий трикотаж с начёсом создаёт уютный средний слой на каждый день. Надевай его поверх базовой хлопковой футболки для лучшей терморегуляции.',
+                en: 'Brushed-fleece cotton builds a cozy everyday mid-layer. Wear it over a basic cotton tee for balanced warmth throughout the day.',
+              },
+            },
+            bottom: {
+              ru: 'Плотные джинсы прямого кроя',
+              en: 'Heavyweight straight-leg jeans',
+              desc: {
+                ru: 'Деним высокой плотности хорошо держит форму и не продувается лёгким морозным ветерком. Свободный прямой крой оставляет воздушную прослойку для тепла.',
+                en: 'High-ounce denim holds its structure and blocks crisp winter breezes. A straight-leg cut leaves enough room for a warm air barrier.',
+              },
+            },
+            shoes: {
+              ru: 'Утеплённые ботинки или высокие кеды',
+              en: 'Insulated boots or winter high-tops',
+              desc: {
+                ru: 'Высокий голеностоп защищает щиколотки от холодного воздуха и попадания снега. Тёплая стелька изолирует стопу от промёрзшего асфальта.',
+                en: 'A high-top collar shields your ankles from cold drafts and slush. An insulated footbed blocks chill rising from frozen pavement.',
+              },
+            },
           },
           cold: {
-            outer: { ru: 'Демисезонная куртка или стеганый бомбер', en: 'Mid-season jacket or quilted bomber', desc: { ru: 'Оптимально для околонулевой погоды', en: 'Ideal around freezing point' } },
-            top: { ru: 'Лонгслив + трикотажный джемпер', en: 'Long-sleeve tee + knit jumper', desc: { ru: 'Удобно снять в помещении или авто', en: 'Easy to layer indoors or in car' } },
-            bottom: { ru: 'Джинсы или плотные чиносы', en: 'Jeans or heavyweight chinos', desc: { ru: 'Базовый городской низ', en: 'Versatile everyday bottoms' } },
-            shoes: { ru: 'Кожаные кроссовки или ботинки челси', en: 'Leather sneakers or Chelsea boots', desc: { ru: 'Не промокают при сырости', en: 'Moisture-resistant everyday footwear' } },
+            outer: {
+              ru: 'Демисезонная куртка или стеганый бомбер',
+              en: 'Mid-season jacket or quilted bomber',
+              desc: {
+                ru: 'Лёгкий синтетический утеплитель отлично подходит для околонулевой и промозглой погоды. Куртка не сковывает движения за рулём и при быстрой ходьбе.',
+                en: 'Lightweight synthetic fill handles damp, near-freezing weather effortlessly. It stays flexible and comfortable both while driving and walking briskly.',
+              },
+            },
+            top: {
+              ru: 'Лонгслив + трикотажный джемпер',
+              en: 'Long-sleeve tee + knit jumper',
+              desc: {
+                ru: 'Двухслойный верх позволяет легко адаптироваться к смене температуры между улицей и помещением. Если станет жарко, джемпер можно просто снять.',
+                en: 'A two-layer top adapts smoothly between chilly streets and warm interiors. You can easily take off the knit jumper if a room feels too warm.',
+              },
+            },
+            bottom: {
+              ru: 'Джинсы или плотные чиносы',
+              en: 'Jeans or heavyweight chinos',
+              desc: {
+                ru: 'Универсальный городской низ из плотного хлопка, который одинаково уместен на учёбе, работе и прогулке. Лучше выбирать тёмные оттенки на случай сырости.',
+                en: 'Versatile heavyweight cotton bottoms suited for errands, work, or casual walks. Darker shades are practical in case sidewalks are damp.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные кроссовки или ботинки челси',
+              en: 'Leather sneakers or Chelsea boots',
+              desc: {
+                ru: 'Гладкая кожа не пропускает влагу от луж и легко очищается от уличной пыли. Подошва средней толщины защитит ноги от сырого холодного асфальта.',
+                en: 'Smooth leather repels puddle splashes and wipes clean easily. A medium-thick sole insulates your feet from cold, damp pavement.',
+              },
+            },
           },
           cool: {
-            outer: { ru: 'Ветровка, джинсовка или лёгкий бомбер', en: 'Windbreaker, denim jacket or bomber', desc: { ru: 'Защита от свежего ветерка', en: 'Blocks crisp breeze' } },
-            top: { ru: 'Футболка + расстёгнутая рубашка или кардиган', en: 'T-shirt + overshirt or cardigan', desc: { ru: 'Многослойность под перепады дня', en: 'Easy layering for daytime shifts' } },
-            bottom: { ru: 'Свободные джинсы или брюки карго', en: 'Relaxed jeans or cargo pants', desc: { ru: 'Свобода движений в городе', en: 'All-day urban comfort' } },
-            shoes: { ru: 'Повседневные кеды или кроссовки', en: 'Everyday sneakers or trainers', desc: { ru: 'Лёгкие и дышащие', en: 'Lightweight & breathable' } },
+            outer: {
+              ru: 'Ветровка, джинсовка или лёгкий бомбер',
+              en: 'Windbreaker, denim jacket or bomber',
+              desc: {
+                ru: 'Надёжно закрывает от свежего ветерка, но при этом не создаёт парникового эффекта на солнце. Удобно носить расстёгнутой днём и застегнуть к вечеру.',
+                en: 'Blocks a crisp breeze without overheating when the sun peeks out. Easy to wear open at midday and zip up once evening cools down.',
+              },
+            },
+            top: {
+              ru: 'Футболка + расстёгнутая рубашка или кардиган',
+              en: 'T-shirt + overshirt or cardigan',
+              desc: {
+                ru: 'Многослойность — лучший выбор для переменчивой прохладной погоды. Такой комплект выглядит расслабленно и позволяет регулировать тепло в течение дня.',
+                en: 'Smart layering is the easiest way to handle shifting cool temperatures. It looks effortlessly relaxed and lets you adjust warmth on the go.',
+              },
+            },
+            bottom: {
+              ru: 'Свободные джинсы или брюки карго',
+              en: 'Relaxed jeans or cargo pants',
+              desc: {
+                ru: 'Плотный дышащий хлопок обеспечивает комфорт при активной ходьбе по городу. Свободный силуэт добавляет образу актуальную повседневную динамику.',
+                en: 'Sturdy, breathable cotton keeps you comfortable during active city walks. A relaxed silhouette brings easy everyday mobility.',
+              },
+            },
+            shoes: {
+              ru: 'Повседневные кеды или кроссовки',
+              en: 'Everyday sneakers or trainers',
+              desc: {
+                ru: 'Лёгкая и гибкая пара с хорошей вентиляцией, в которой ноги не устанут за целый день. Отлично сочетается с любым повседневным низом.',
+                en: 'A light, flexible pair with balanced breathability for all-day walking. Pairs cleanly with denim, chinos, or cargo trousers.',
+              },
+            },
           },
           mild: {
-            outer: { ru: 'Лёгкая оверсайз-рубашка (на вечер)', en: 'Light overshirt (for evening)', desc: { ru: 'Накинуть, если вечером посвежеет', en: 'Handy when evening cools down' } },
-            top: { ru: 'Плотная хлопковая футболка или поло', en: 'Heavy cotton T-shirt or polo', desc: { ru: 'Дышащий натуральный хлопок', en: 'Breathable natural cotton' } },
-            bottom: { ru: 'Лёгкие джинсы или чиносы', en: 'Light denim or chinos', desc: { ru: 'Комфортно при +15…+20°C', en: 'Comfortable in mild weather' } },
-            shoes: { ru: 'Низкие кеды или кроссовки', en: 'Low-top sneakers', desc: { ru: 'Универсальная городская пара', en: 'Clean everyday pair' } },
+            outer: {
+              ru: 'Лёгкая оверсайз-рубашка (на вечер)',
+              en: 'Light overshirt (for evening)',
+              desc: {
+                ru: 'Днём её можно накинуть на плечи или убрать в рюкзак, а после заката она спасёт от вечерней прохлады. Лёгкая хлопковая или фланелевая ткань почти не весит.',
+                en: 'Drape it over your shoulders or pack it by day, then throw it on after sunset. Lightweight cotton or flannel adds warmth without bulk.',
+              },
+            },
+            top: {
+              ru: 'Плотная хлопковая футболка или поло',
+              en: 'Heavy cotton T-shirt or polo',
+              desc: {
+                ru: 'Качественный плотный трикотаж хорошо держит силуэт и приятно ощущается на коже. Натуральный хлопок позволяет телу свободно дышать в мягкую погоду.',
+                en: 'Structured heavyweight jersey holds a clean drape and feels soft on the skin. Natural cotton keeps airflow steady in mild temperatures.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие джинсы или чиносы',
+              en: 'Light denim or chinos',
+              desc: {
+                ru: 'Комфортная посадка и средняя плотность ткани идеально подходят для +15…+20°C. В них не жарко на солнце и не прохладно в тени.',
+                en: 'A comfortable cut and mid-weight weave hit the sweet spot for +15 to +20°C. Never too warm in the sun or too chilly in the shade.',
+              },
+            },
+            shoes: {
+              ru: 'Низкие кеды или кроссовки',
+              en: 'Low-top sneakers',
+              desc: {
+                ru: 'Универсальная городская пара, которая одинаково хорошо смотрится с джинсами и чиносами. Мягкая стелька гарантирует лёгкость на длинных прогулках.',
+                en: 'A clean everyday staple that works with both jeans and chinos. Cushioned insoles keep your stride effortless on long walks.',
+              },
+            },
           },
           warm: {
-            outer: { ru: 'Верхний слой не нужен', en: 'No outerwear needed', desc: { ru: 'На улице достаточно тепло', en: 'Warm enough without layers' } },
-            top: { ru: 'Свободная футболка из хлопка или льна', en: 'Relaxed cotton or linen T-shirt', desc: { ru: 'Максимальная вентиляция', en: 'Maximum airflow' } },
-            bottom: { ru: 'Шорты или лёгкие брюки из хлопка', en: 'Shorts or lightweight cotton trousers', desc: { ru: 'Не сковывают и не парят', en: 'Cool and unrestricted' } },
-            shoes: { ru: 'Лёгкие текстильные кеды или сандалии', en: 'Canvas sneakers or sandals', desc: { ru: 'Дышащая летняя обувь', en: 'Breathable summer footwear' } },
+            outer: {
+              ru: 'Верхний слой не нужен',
+              en: 'No outerwear needed',
+              desc: {
+                ru: 'На улице достаточно тепло даже в тени, поэтому куртка или кофта будут только мешать. Ограничься одним лёгким и дышащим слоем.',
+                en: 'It is warm enough outdoors even in the shade, so extra layers will only weigh you down. Stick to a single breathable top.',
+              },
+            },
+            top: {
+              ru: 'Свободная футболка из хлопка или льна',
+              en: 'Relaxed cotton or linen T-shirt',
+              desc: {
+                ru: 'Свободный крой обеспечивает естественную циркуляцию воздуха и не прилипает к телу. Выбирай светлые оттенки, чтобы меньше нагреваться на солнце.',
+                en: 'A relaxed fit encourages natural airflow and prevents fabric from clinging. Light colors help reflect direct afternoon sunlight.',
+              },
+            },
+            bottom: {
+              ru: 'Шорты или лёгкие брюки из хлопка',
+              en: 'Shorts or lightweight cotton trousers',
+              desc: {
+                ru: 'Тонкий натуральный материал даёт ногам дышать и не сковывает шаг. Выбирай шорты для прогулок или тонкие брюки для более закрытого городского образа.',
+                en: 'Thin natural weaves let your legs breathe and move freely. Go with shorts for relaxed walks or airy cotton trousers for extra coverage.',
+              },
+            },
+            shoes: {
+              ru: 'Лёгкие текстильные кеды или сандалии',
+              en: 'Canvas sneakers or sandals',
+              desc: {
+                ru: 'Дышащий верх из канваса или открытая конструкция предотвращают перегрев стоп. Носи с низкими невидимыми носками для аккуратного вида.',
+                en: 'Breathable canvas uppers or open sandals prevent your feet from overheating. Pair canvas sneakers with no-show socks for a clean look.',
+              },
+            },
           },
           hot: {
-            outer: { ru: 'Без верхней одежды', en: 'No outer layer', desc: { ru: 'Минимум слоёв в жару', en: 'Minimal layers for heat' } },
-            top: { ru: 'Свободная льняная рубашка или майка', en: 'Loose linen shirt or tank top', desc: { ru: 'Светлые тона отражают солнце', en: 'Light colors reflect sunlight' } },
-            bottom: { ru: 'Лёгкие льняные или хлопковые шорты', en: 'Breezy linen or cotton shorts', desc: { ru: 'Комфорт даже в пик жары', en: 'Breathable in peak heat' } },
-            shoes: { ru: 'Открытые сандалии или слипоны', en: 'Open sandals or slip-ons', desc: { ru: 'Лёгкость на каждый шаг', en: 'Airy warm-weather footwear' } },
+            outer: {
+              ru: 'Без верхней одежды',
+              en: 'No outer layer',
+              desc: {
+                ru: 'В такую жару любая дополнительная ткань быстро вызывает дискомфорт. Оставь верхний слой дома и сделай ставку на минимализм.',
+                en: 'Any extra fabric quickly traps heat in temperatures this high. Leave outerwear at home and keep your outfit minimal.',
+              },
+            },
+            top: {
+              ru: 'Свободная льняная рубашка или майка',
+              en: 'Loose linen shirt or tank top',
+              desc: {
+                ru: 'Натуральный лён мгновенно отводит влагу и дарит ощущение прохлады даже на солнцепёке. Светлые тона дополнительно защищают от перегрева.',
+                en: 'Natural linen wicks moisture fast and feels cool against the skin even in direct sun. Pale tones help deflect intense solar heat.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие льняные или хлопковые шорты',
+              en: 'Breezy linen or cotton shorts',
+              desc: {
+                ru: 'Невесомая дышащая ткань обеспечивает максимальную вентиляцию в пик дневной жары. Свободный пояс и крой гарантируют комфорт в движении.',
+                en: 'Featherweight breathable fabric maximizes airflow during peak afternoon heat. A relaxed waist and cut keep you comfortable on the move.',
+              },
+            },
+            shoes: {
+              ru: 'Открытые сандалии или слипоны',
+              en: 'Open sandals or slip-ons',
+              desc: {
+                ru: 'Максимально открытая или лёгкая перфорированная обувь даёт стопам дышать. Гибкая подошва не утяжеляет шаг на горячем асфальте.',
+                en: 'Open straps or perforated uppers let your feet breathe freely. Flexible soles keep every step light even on sun-baked pavement.',
+              },
+            },
           },
         },
 
         smart: {
           arctic: {
-            outer: { ru: 'Утеплённое шерстяное пальто или парка-аляска', en: 'Insulated wool coat or sleek parka', desc: { ru: 'Строгий силуэт + зимний утеплитель', en: 'Sharp silhouette with winter warmth' } },
-            top: { ru: 'Кашемировая водолазка + термолонгслив', en: 'Cashmere turtleneck + thermal top', desc: { ru: 'Элегантно и очень тепло', en: 'Refined and cozy' } },
-            bottom: { ru: 'Шерстяные брюки с начёсом или тёмный деним', en: 'Brushed wool trousers or dark denim', desc: { ru: 'Держат форму и тепло', en: 'Structured and warm' } },
-            shoes: { ru: 'Утеплённые кожаные челси или дерби на меху', en: 'Shearling-lined leather Chelsea boots', desc: { ru: 'Подошва с защитой от скольжения', en: 'Winter-grip leather boots' } },
+            outer: {
+              ru: 'Утеплённое шерстяное пальто или парка-аляска',
+              en: 'Insulated wool coat or sleek parka',
+              desc: {
+                ru: 'Лаконичный внешний вид сочетается с полноценным зимним утеплителем и ветрозащитой. Такой силуэт сохраняет статусность образа даже в сильный мороз.',
+                en: 'Clean tailored lines meet full winter insulation and windproofing. This silhouette keeps your outfit sharp even in deep sub-zero cold.',
+              },
+            },
+            top: {
+              ru: 'Кашемировая водолазка + термолонгслив',
+              en: 'Cashmere turtleneck + thermal top',
+              desc: {
+                ru: 'Высокий ворот водолазки надёжно закрывает горло от холода без лишнего объёма. Тонкий термослой под низ согреет лучше любого толстого свитера.',
+                en: 'A high turtleneck collar seals warmth around your neck without bulk. Layering a thin thermal underneath beats a single heavy sweater.',
+              },
+            },
+            bottom: {
+              ru: 'Шерстяные брюки с начёсом или тёмный деним',
+              en: 'Brushed wool trousers or dark denim',
+              desc: {
+                ru: 'Плотная костюмная шерсть или однотонный тёмный деним отлично удерживают тепло и держат чёткую линию кроя. Идеально для офиса и деловых встреч зимой.',
+                en: 'Dense brushed wool or clean dark denim locks in warmth while holding a sharp drape. Ideal for winter office days and meetings.',
+              },
+            },
+            shoes: {
+              ru: 'Утеплённые кожаные челси или дерби на меху',
+              en: 'Shearling-lined leather Chelsea boots',
+              desc: {
+                ru: 'Элегантный силуэт из натуральной кожи дополнен тёплой меховой подкладкой и нескользящей подошвой. Ноги остаются в тепле без потери делового стиля.',
+                en: 'Sleek full-grain leather hides a cozy shearling lining and high-grip winter sole. Your feet stay warm without sacrificing refined style.',
+              },
+            },
           },
           freezing: {
-            outer: { ru: 'Шерстяное пальто до колена', en: 'Knee-length wool overcoat', desc: { ru: 'Собранный городской образ', en: 'Polished city outerwear' } },
-            top: { ru: 'Тонкий мериносовый свитер поверх рубашки', en: 'Merino knit sweater over a shirt', desc: { ru: 'Аккуратная многослойность', en: 'Smart layered look' } },
-            bottom: { ru: 'Плотные чиносы или тёмные джинсы без потёртостей', en: 'Heavy chinos or clean dark jeans', desc: { ru: 'Универсально для офиса и встреч', en: 'Office & dinner ready' } },
-            shoes: { ru: 'Кожаные ботинки челси на толстой подошве', en: 'Lug-sole leather Chelsea boots', desc: { ru: 'Защита от холодного асфальта', en: 'Insulated from cold pavement' } },
+            outer: {
+              ru: 'Шерстяное пальто до колена',
+              en: 'Knee-length wool overcoat',
+              desc: {
+                ru: 'Плотная шерстяная ткань с добавлением кашемира или полиамида защищает от холода и мокрого снега. Длина до колена закрывает пиджак или трикотаж от ветра.',
+                en: 'Dense wool-blend fabric shields you from crisp cold and light snow. The knee-length cut keeps jackets and knitwear covered against gusts.',
+              },
+            },
+            top: {
+              ru: 'Тонкий мериносовый свитер поверх рубашки',
+              en: 'Merino knit sweater over a shirt',
+              desc: {
+                ru: 'Шерсть мериноса греет при минимальной толщине и не колется, а воротник рубашки добавляет собранности. Классическая формула смарт-кэжуал для зимы.',
+                en: 'Fine merino wool insulates without bulk while a crisp shirt collar adds structure. A timeless smart-casual layering formula for cold days.',
+              },
+            },
+            bottom: {
+              ru: 'Плотные чиносы или тёмные джинсы без потёртостей',
+              en: 'Heavy chinos or clean dark jeans',
+              desc: {
+                ru: 'Ровный глубокий цвет и плотное плетение хлопка делают образ аккуратным и универсальным. Они легко сочетаются как с пальто, так и с ботинками.',
+                en: 'Rich, solid tones and heavyweight cotton twill keep your look neat and versatile. They pair effortlessly with overcoats and leather boots.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные ботинки челси на толстой подошве',
+              en: 'Lug-sole leather Chelsea boots',
+              desc: {
+                ru: 'Массивный рант и протектор изолируют стопу от ледяного асфальта и слякоти. Обработай кожу водоотталкивающим кремом перед выходом.',
+                en: 'A chunky welt and lugged sole insulate your feet from frozen ground and slush. Apply a water-repellent cream before heading out.',
+              },
+            },
           },
           cold: {
-            outer: { ru: 'Утеплённый тренч или стёганый блейзер-куртка', en: 'Lined trench coat or quilted jacket', desc: { ru: 'Защита от ветра без громоздкости', en: 'Windproof without bulk' } },
-            top: { ru: 'Водолазка из мериноса или джемпер', en: 'Merino turtleneck or fine-knit sweater', desc: { ru: 'Дышит в помещении и греет на улице', en: 'Breathable indoors, warm outside' } },
-            bottom: { ru: 'Брюки чинос или слаксы', en: 'Chinos or tailored slacks', desc: { ru: 'Аккуратная посадка на каждый день', en: 'Clean everyday tailoring' } },
-            shoes: { ru: 'Кожаные челси или минималистичные кеды', en: 'Leather Chelsea boots or clean sneakers', desc: { ru: 'Сдержанный премиальный вид', en: 'Understated smart footwear' } },
+            outer: {
+              ru: 'Утеплённый тренч или стёганый блейзер-куртка',
+              en: 'Lined trench coat or quilted jacket',
+              desc: {
+                ru: 'Лёгкая стёжка или съёмная утеплённая подстёжка защищают от пронизывающего ветра. При этом силуэт остаётся подтянутым и элегантным.',
+                en: 'Subtle quilting or a warm lining blocks chilly winds without looking bulky. The tailored cut keeps your silhouette sharp and refined.',
+              },
+            },
+            top: {
+              ru: 'Водолазка из мериноса или джемпер',
+              en: 'Merino turtleneck or fine-knit sweater',
+              desc: {
+                ru: 'Тонкий трикотаж поддерживает комфортную температуру и в прохладном транспорте, и в тёплом кафе. Лаконичный верх без лишних деталей.',
+                en: 'Fine knitwear regulates warmth smoothly between chilly streets and cozy cafes. Clean lines keep the upper half effortless.',
+              },
+            },
+            bottom: {
+              ru: 'Брюки чинос или слаксы',
+              en: 'Chinos or tailored slacks',
+              desc: {
+                ru: 'Аккуратный зауженный или прямой крой выглядит более собрано, чем обычные джинсы. Хлопок с небольшим добавлением эластана даёт полную свободу шага.',
+                en: 'A clean tailored fit looks noticeably sharper than standard denim. Cotton with a touch of stretch ensures easy movement all day.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные челси или минималистичные кеды',
+              en: 'Leather Chelsea boots or clean sneakers',
+              desc: {
+                ru: 'Гладкая кожа без лишнего декора подчёркивает сдержанный стиль образа. Закрытый верх надёжно защищает от сырости и утренней росы.',
+                en: 'Unadorned smooth leather reinforces an understated, polished look. Closed uppers protect your feet from morning dampness.',
+              },
+            },
           },
           cool: {
-            outer: { ru: 'Классический тренч или замшевая куртка', en: 'Classic trench or suede overshirt', desc: { ru: 'Идеально для прохладного утра', en: 'Ideal for crisp mornings' } },
-            top: { ru: 'Оксфордская рубашка или лонгслив-поло', en: 'Oxford shirt or long-sleeve polo', desc: { ru: 'Чёткий воротник и комфорт', en: 'Crisp collar and comfort' } },
-            bottom: { ru: 'Хлопковые чиносы или брюки со стрелкой', en: 'Cotton chinos or pleated trousers', desc: { ru: 'Лёгкий и опрятный силуэт', en: 'Light, neat silhouette' } },
-            shoes: { ru: 'Кожаные лоферы или белые кеды', en: 'Leather loafers or clean white sneakers', desc: { ru: 'Баланс строгости и комфорта', en: 'Smart-casual balance' } },
+            outer: {
+              ru: 'Классический тренч или замшевая куртка',
+              en: 'Classic trench or suede overshirt',
+              desc: {
+                ru: 'Плотный хлопковый габардин тренча или мягкая замша идеально подходят для свежего утра. Днём куртку можно носить нараспашку поверх рубашки.',
+                en: 'Tightly woven trench gabardine or soft suede handles crisp mornings with ease. Wear it unbuttoned over a shirt as the afternoon warms up.',
+              },
+            },
+            top: {
+              ru: 'Оксфордская рубашка или лонгслив-поло',
+              en: 'Oxford shirt or long-sleeve polo',
+              desc: {
+                ru: 'Чёткий воротник держит форму даже без галстука и пиджака. Плотный хлопок оксфорд приятно согревает в прохладную погоду.',
+                en: 'A structured collar holds its shape even without a tie or blazer. Mid-weight Oxford cotton feels crisp and comfortable in cool air.',
+              },
+            },
+            bottom: {
+              ru: 'Хлопковые чиносы или брюки со стрелкой',
+              en: 'Cotton chinos or pleated trousers',
+              desc: {
+                ru: 'Лёгкий и опрятный силуэт, который одинаково уместен на деловой встрече и вечернем ужине. Выбирай бежевые, тёмно-синие или оливковые оттенки.',
+                en: 'A neat, tailored drape equally suited for client meetings or evening dinners. Navy, olive, or sand tones mix effortlessly.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные лоферы или белые кеды',
+              en: 'Leather loafers or clean white sneakers',
+              desc: {
+                ru: 'Идеальный баланс между строгой классикой и городским комфортом. Лаконичная подошва делает походку лёгкой на протяжении всего дня.',
+                en: 'Strikes the ideal balance between formal polish and everyday ease. A sleek sole keeps your step light from morning to night.',
+              },
+            },
           },
           mild: {
-            outer: { ru: 'Лёгкий пиджак или кардиган (по желанию)', en: 'Unstructured blazer or cardigan', desc: { ru: 'Добавит собранности на встречах', en: 'Adds polish for meetings' } },
-            top: { ru: 'Трикотажное поло или рубашка с закатанным рукавом', en: 'Knit polo or rolled-sleeve shirt', desc: { ru: 'Комфорт в мягкую погоду', en: 'Effortless in mild weather' } },
-            bottom: { ru: 'Лёгкие чиносы или брюки из смесового льна', en: 'Lightweight chinos or linen-blend pants', desc: { ru: 'Дышащая ткань на весь день', en: 'All-day breathability' } },
-            shoes: { ru: 'Замшевые лоферы или минималистичные кеды', en: 'Suede loafers or minimalist sneakers', desc: { ru: 'Лёгкая элегантная пара', en: 'Light refined footwear' } },
+            outer: {
+              ru: 'Лёгкий пиджак или кардиган (по желанию)',
+              en: 'Unstructured blazer or cardigan',
+              desc: {
+                ru: 'Неструктурированный пиджак без жёстких подплечников добавляет собранности, но ощущается как лёгкая кофта. Удобно накинуть на встречу или вечером.',
+                en: 'An unstructured blazer without stiff padding adds instant polish while feeling as easy as a cardigan. Great for meetings or breezy evenings.',
+              },
+            },
+            top: {
+              ru: 'Трикотажное поло или рубашка с закатанным рукавом',
+              en: 'Knit polo or rolled-sleeve shirt',
+              desc: {
+                ru: 'Фактурный трикотаж или мягкий хлопок выглядят намного интереснее обычной футболки. Воротник создаёт аккуратный акцент в портретной зоне.',
+                en: 'Textured knitwear or soft cotton elevates your look far beyond a plain tee. A neat collar frames the neckline with effortless style.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие чиносы или брюки из смесового льна',
+              en: 'Lightweight chinos or linen-blend pants',
+              desc: {
+                ru: 'Дышащая ткань средней плотности обеспечивает комфорт в мягкую дневную погоду. Брюки не мнутся так сильно, как чистый лён, но отлично вентилируются.',
+                en: 'Breathable mid-weight fabric keeps you comfortable in mild daytime warmth. Linen-cotton blends resist heavy creasing while staying airy.',
+              },
+            },
+            shoes: {
+              ru: 'Замшевые лоферы или минималистичные кеды',
+              en: 'Suede loafers or minimalist sneakers',
+              desc: {
+                ru: 'Мягкая замша добавляет образу фактурности и благородного расслабленного шика. Отлично смотрится в сухую ясную или малооблачную погоду.',
+                en: 'Supple suede brings rich texture and understated, relaxed elegance. Best suited for dry, clear, or partly cloudy days.',
+              },
+            },
           },
           warm: {
-            outer: { ru: 'Верхний слой не нужен', en: 'No outer layer needed', desc: { ru: 'Достаточно одного лёгкого верха', en: 'Single breathable top is enough' } },
-            top: { ru: 'Льняная рубашка или поло из тонкого хлопка', en: 'Linen shirt or fine cotton polo', desc: { ru: 'Выглядит статусно даже в +25°C', en: 'Looks sharp even at +25°C' } },
-            bottom: { ru: 'Лёгкие брюки чинос или льняные слаксы', en: 'Light chinos or tailored linen trousers', desc: { ru: 'Свободный дышащий крой', en: 'Airy tailored fit' } },
-            shoes: { ru: 'Лоферы без носков (со следками) или кеды', en: 'Loafers with no-show socks or light sneakers', desc: { ru: 'Аккуратный летний вид', en: 'Clean warm-weather look' } },
+            outer: {
+              ru: 'Верхний слой не нужен',
+              en: 'No outer layer needed',
+              desc: {
+                ru: 'Тёплая погода позволяет обойтись без пиджака или кардигана, сохранив лёгкость образа. Всю роль берёт на себя качественная рубашка или поло.',
+                en: 'Warm temperatures let you skip jackets and cardigans while staying sharp. A well-cut shirt or polo carries the entire look.',
+              },
+            },
+            top: {
+              ru: 'Льняная рубашка или поло из тонкого хлопка',
+              en: 'Linen shirt or fine cotton polo',
+              desc: {
+                ru: 'Воздушное плетение ткани пропускает ветерок и не даёт перегреться даже в +25°C. Расстегни верхнюю пуговицу для расслабленного летнего настроения.',
+                en: 'An open weave lets breezes pass through so you stay cool even at +25°C. Leave the top button undone for relaxed summer polish.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие брюки чинос или льняные слаксы',
+              en: 'Light chinos or tailored linen trousers',
+              desc: {
+                ru: 'Свободный дышащий крой сохраняет элегантный силуэт без парникового эффекта. Светлые пастельные или песочные тона меньше притягивают солнце.',
+                en: 'A relaxed, breathable cut preserves a tailored silhouette without trapping heat. Sand or pastel shades absorb far less sunlight.',
+              },
+            },
+            shoes: {
+              ru: 'Лоферы без носков (со следками) или кеды',
+              en: 'Loafers with no-show socks or light sneakers',
+              desc: {
+                ru: 'Открытая щиколотка визуально облегчает летний образ и улучшает вентиляцию. Используй хлопковые следки для максимальной гигиены и комфорта.',
+                en: 'Showing a hint of ankle keeps summer tailoring light and improves airflow. Wear invisible cotton liners for all-day freshness.',
+              },
+            },
           },
           hot: {
-            outer: { ru: 'Без верхней одежды', en: 'No outerwear', desc: { ru: 'Максимум лёгкости в жару', en: 'Maximum lightness in heat' } },
-            top: { ru: 'Рубашка с коротким рукавом из 100% льна', en: '100% linen short-sleeve shirt', desc: { ru: 'Лучшая ткань для жаркой погоды', en: 'Best fabric for high heat' } },
-            bottom: { ru: 'Льняные брюки или строгие шорты-бермуды', en: 'Linen trousers or tailored Bermuda shorts', desc: { ru: 'Собранный вид без перегрева', en: 'Polished without overheating' } },
-            shoes: { ru: 'Плетёные лоферы или кожаные сандалии', en: 'Woven loafers or leather sandals', desc: { ru: 'Вентиляция и стиль', en: 'Ventilated & smart' } },
+            outer: {
+              ru: 'Без верхней одежды',
+              en: 'No outerwear',
+              desc: {
+                ru: 'В сильную жару любой второй слой будет лишним. Сделай ставку на безупречную посадку лёгкой рубашки и натуральные дышащие ткани.',
+                en: 'Any second layer is unnecessary in intense summer heat. Rely on the crisp fit of a breathable shirt and natural fabrics.',
+              },
+            },
+            top: {
+              ru: 'Рубашка с коротким рукавом из 100% льна',
+              en: '100% linen short-sleeve shirt',
+              desc: {
+                ru: 'Чистый лён — лучший природный терморегулятор для знойного дня. Отложной воротник сохраняет аккуратный смарт-кэжуал вид даже при +32°C.',
+                en: 'Pure linen is nature’s best thermoregulator for scorching days. A camp or button-down collar keeps your look sharp even at +32°C.',
+              },
+            },
+            bottom: {
+              ru: 'Льняные брюки или строгие шорты-бермуды',
+              en: 'Linen trousers or tailored Bermuda shorts',
+              desc: {
+                ru: 'Длина до колена и аккуратные защипы на бермудах позволяют выглядеть собранно даже в жару. Тонкая ткань мгновенно отводит тепло от тела.',
+                en: 'Knee-length tailored Bermudas or airy linen trousers keep you polished in high heat. Featherweight weaves release body heat quickly.',
+              },
+            },
+            shoes: {
+              ru: 'Плетёные лоферы или кожаные сандалии',
+              en: 'Woven loafers or leather sandals',
+              desc: {
+                ru: 'Перфорированная или плетёная кожа обеспечивает естественный приток воздуха к стопе. Элегантная альтернатива закрытым туфлям для лета.',
+                en: 'Woven or perforated leather lets air circulate naturally around your feet. A refined warm-weather alternative to closed shoes.',
+              },
+            },
           },
         },
 
         sport: {
           arctic: {
-            outer: { ru: 'Утеплённая спортивная пуховая куртка', en: 'Insulated athletic down jacket', desc: { ru: 'Ветрозащитная мембрана и лёгкий вес', en: 'Windproof shell with lightweight warmth' } },
-            top: { ru: 'Термобельё (1 слой) + тёплый флис (2 слой)', en: 'Thermal base layer + heavyweight fleece', desc: { ru: 'Отводит влагу и удерживает тепло', en: 'Wicks moisture while trapping heat' } },
-            bottom: { ru: 'Утеплённые спортивные брюки или тайтсы с начёсом', en: 'Fleece-lined track pants or winter tights', desc: { ru: 'Не сковывают шаг на морозе', en: 'Unrestricted stride in sub-zero cold' } },
-            shoes: { ru: 'Зимние утеплённые кроссовки с агрессивным протектором', en: 'Insulated winter trail sneakers', desc: { ru: 'Сцепление на снегу и льду', en: 'High traction on snow & ice' } },
+            outer: {
+              ru: 'Утеплённая спортивная пуховая куртка',
+              en: 'Insulated athletic down jacket',
+              desc: {
+                ru: 'Мембранный верх защищает от ледяного ветра и мокрого снега, а пуховый наполнитель удерживает тепло при минимальном весе. Утяжки по низу не пускают холод внутрь.',
+                en: 'A windproof shell blocks freezing gusts and snow while down fill locks in heat without weight. Adjustable hem drawcords seal out drafts.',
+              },
+            },
+            top: {
+              ru: 'Термобельё (1 слой) + тёплый флис (2 слой)',
+              en: 'Thermal base layer + heavyweight fleece',
+              desc: {
+                ru: 'Спортивная система слоёв быстро отводит влагу при активной ходьбе и не даёт остыть на остановках. Флис мгновенно согревает даже в суровый минус.',
+                en: 'An athletic layering system wicks sweat during brisk movement and prevents post-walk chill. Heavyweight fleece traps warmth in deep frost.',
+              },
+            },
+            bottom: {
+              ru: 'Утеплённые спортивные брюки или тайтсы с начёсом',
+              en: 'Fleece-lined track pants or winter tights',
+              desc: {
+                ru: 'Эластичный ветрозащитный материал с мягким начёсом внутри не сковывает широкий шаг. Отлично подходит для зимних прогулок и тренировок на свежем воздухе.',
+                en: 'Stretchy wind-resistant fabric with a brushed interior never restricts your stride. Ideal for brisk winter walks and outdoor training.',
+              },
+            },
+            shoes: {
+              ru: 'Зимние утеплённые кроссовки с агрессивным протектором',
+              en: 'Insulated winter trail sneakers',
+              desc: {
+                ru: 'Специальный зимний компаунд подошвы не дубеет на морозе и уверенно держит на льду. Утеплённый носок защищает пальцы от промерзания.',
+                en: 'Winter-grade rubber stays pliable in sub-zero cold for reliable ice traction. An insulated toe box shields your feet from frost.',
+              },
+            },
           },
           freezing: {
-            outer: { ru: 'Спортивный пуховик или утеплённый софтшелл', en: 'Athletic puffer or insulated softshell', desc: { ru: 'Защита от ветра при активной ходьбе', en: 'Wind protection for brisk movement' } },
-            top: { ru: 'Флисовая кофта на молнии + спортивный лонгслив', en: 'Zip fleece pullover + athletic long-sleeve', desc: { ru: 'Удобно регулировать температуру молнией', en: 'Easy zip ventilation' } },
-            bottom: { ru: 'Плотные спортивные джоггеры на флисе', en: 'Heavyweight fleece athletic joggers', desc: { ru: 'Тёплый и мягкий трикотаж', en: 'Warm soft-brushed knit' } },
-            shoes: { ru: 'Утеплённые кроссовки с влагозащитой (Gore-Tex)', en: 'Water-resistant insulated trainers', desc: { ru: 'Сухие ноги в слякоть и мороз', en: 'Dry feet in slush & cold' } },
+            outer: {
+              ru: 'Спортивный пуховик или утеплённый софтшелл',
+              en: 'Athletic puffer or insulated softshell',
+              desc: {
+                ru: 'Софтшелл или лёгкий пуховик отлично блокируют встречный ветер при динамичном движении. Эргономичный крой рукавов не стесняет размах при ходьбе.',
+                en: 'An athletic puffer or insulated softshell blocks headwinds during active movement. Articulated sleeves keep your arm swing natural.',
+              },
+            },
+            top: {
+              ru: 'Флисовая кофта на молнии + спортивный лонгслив',
+              en: 'Zip fleece pullover + athletic long-sleeve',
+              desc: {
+                ru: 'Молния до груди или по всей длине позволяет быстро сбросить лишнее тепло, если ты ускорил шаг. Дышащий лонгслив под низ отводит влагу от кожи.',
+                en: 'A zip front lets you vent excess heat the moment you pick up the pace. A moisture-wicking long-sleeve underneath keeps skin dry.',
+              },
+            },
+            bottom: {
+              ru: 'Плотные спортивные джоггеры на флисе',
+              en: 'Heavyweight fleece athletic joggers',
+              desc: {
+                ru: 'Мягкий трикотаж высокой плотности с эластичными манжетами снизу не пропускает холодный воздух к щиколоткам. Комфортно и на улице, и в дороге.',
+                en: 'Dense brushed-fleece knit with ribbed ankle cuffs seals out cold drafts. Cozy for outdoor errands and commuting alike.',
+              },
+            },
+            shoes: {
+              ru: 'Утеплённые кроссовки с влагозащитой (Gore-Tex)',
+              en: 'Water-resistant insulated trainers',
+              desc: {
+                ru: 'Мембрана не пропускает талый снег и слякоть, сохраняя ноги абсолютно сухими. Амортизирующая пена смягчает шаг на твёрдом зимнем покрытии.',
+                en: 'A waterproof membrane keeps slush and melting snow out so feet stay dry. Cushioned midsoles absorb impact on hard winter ground.',
+              },
+            },
           },
           cold: {
-            outer: { ru: 'Куртка софтшелл или лёгкий стеганый жилет + худи', en: 'Softshell jacket or quilted vest + hoodie', desc: { ru: 'Не продувается и не стесняет движений', en: 'Windproof and flexible' } },
-            top: { ru: 'Технологичный свитшот или худи', en: 'Tech-fleece sweatshirt or hoodie', desc: { ru: 'Сохраняет тепло при активности', en: 'Retains warmth on the move' } },
-            bottom: { ru: 'Плотные трикотажные джоггеры', en: 'Heavy knit athletic joggers', desc: { ru: 'Комфортная посадка на каждый день', en: 'Comfortable everyday fit' } },
-            shoes: { ru: 'Кроссовки из плотной кожи или с мембраной', en: 'Weather-shielded running sneakers', desc: { ru: 'Защита от луж и холодного ветра', en: 'Shields against puddles & wind' } },
+            outer: {
+              ru: 'Куртка софтшелл или лёгкий стеганый жилет + худи',
+              en: 'Softshell jacket or quilted vest + hoodie',
+              desc: {
+                ru: 'Многослойная спортивная комбинация защищает корпус от ветра и оставляет максимум свободы рукам. Идеальный вариант для активного городского темпа.',
+                en: 'A layered athletic setup shields your core from wind while leaving arms free to move. Built for a fast-paced urban day.',
+              },
+            },
+            top: {
+              ru: 'Технологичный свитшот или худи',
+              en: 'Tech-fleece sweatshirt or hoodie',
+              desc: {
+                ru: 'Современный двухсторонний трикотаж удерживает тепло без лишнего веса и громоздкости. Глубокий капюшон защитит голову от внезапного порыва ветра.',
+                en: 'Modern spacer-knit fleece traps warmth without heavy bulk. A structured hood adds instant protection against sudden gusts.',
+              },
+            },
+            bottom: {
+              ru: 'Плотные трикотажные джоггеры',
+              en: 'Heavy knit athletic joggers',
+              desc: {
+                ru: 'Держат форму в коленях, не продуваются лёгким ветром и дарят полный комфорт в течение дня. Карманы на молнии надёжно сохранят телефон и ключи.',
+                en: 'Holds its shape at the knees, blocks light breezes, and stays comfortable all day. Zippered pockets keep keys and phone secure.',
+              },
+            },
+            shoes: {
+              ru: 'Кроссовки из плотной кожи или с мембраной',
+              en: 'Weather-shielded running sneakers',
+              desc: {
+                ru: 'Закрытый верх без крупной сетки защищает от брызг из-под ног и прохладного воздуха. Цепкая подмётка уверенно держит на мокром асфальте.',
+                en: 'A closed upper without open mesh blocks puddle spray and chilly air. High-grip outsoles keep traction steady on wet asphalt.',
+              },
+            },
           },
           cool: {
-            outer: { ru: 'Лёгкая беговая ветровка или анорак', en: 'Lightweight running windbreaker or anorak', desc: { ru: 'Защита от ветра при минимальном весе', en: 'Featherweight wind protection' } },
-            top: { ru: 'Дышащий лонгслив или лёгкий свитшот', en: 'Breathable long-sleeve or light sweatshirt', desc: { ru: 'Отводит влагу при быстрой ходьбе', en: 'Moisture-wicking comfort' } },
-            bottom: { ru: 'Спортивные брюки или леггинсы', en: 'Track pants or athletic leggings', desc: { ru: 'Эластичная ткань без перегрева', en: 'Stretchy fabric without overheating' } },
-            shoes: { ru: 'Амортизирующие беговые или лайфстайл-кроссовки', en: 'Cushioned running or lifestyle sneakers', desc: { ru: 'Мягкая подошва на весь день', en: 'All-day cushioned support' } },
+            outer: {
+              ru: 'Лёгкая беговая ветровка или анорак',
+              en: 'Lightweight running windbreaker or anorak',
+              desc: {
+                ru: 'Тонкий нейлон мгновенно отсекает ветер и почти не ощущается на плечах. При необходимости ветровку легко свернуть и убрать в сумку или рюкзак.',
+                en: 'Featherweight nylon cuts wind chill instantly while feeling weightless on your shoulders. Easily packs away into a bag whenever needed.',
+              },
+            },
+            top: {
+              ru: 'Дышащий лонгслив или лёгкий свитшот',
+              en: 'Breathable long-sleeve or light sweatshirt',
+              desc: {
+                ru: 'Ткань поддерживает оптимальный микроклимат при быстрой ходьбе и не даёт вспотеть в транспорте. Мягкие плоские швы не натирают при движении.',
+                en: 'Breathable fabric balances warmth during brisk walks without overheating indoors. Smooth seams ensure chafe-free comfort all day.',
+              },
+            },
+            bottom: {
+              ru: 'Спортивные брюки или леггинсы',
+              en: 'Track pants or athletic leggings',
+              desc: {
+                ru: 'Эластичный материал тянется во всех направлениях и обеспечивает полную свободу движений. Быстро сохнет, если попадёшь под мелкую морось.',
+                en: 'Four-way stretch fabric moves naturally with every stride. Quick-drying fibers handle light mist or drizzle effortlessly.',
+              },
+            },
+            shoes: {
+              ru: 'Амортизирующие беговые или лайфстайл-кроссовки',
+              en: 'Cushioned running or lifestyle sneakers',
+              desc: {
+                ru: 'Мягкая промежуточная подошва снимает нагрузку со стоп и спины при долгой ходьбе. Умеренная вентиляция подходит для прохладной сухой погоды.',
+                en: 'Plush midsole cushioning reduces foot fatigue on long city walks. Balanced breathability suits crisp, dry days.',
+              },
+            },
           },
           mild: {
-            outer: { ru: 'Тонкая ветровка в рюкзак (на вечер)', en: 'Packable windbreaker (for evening)', desc: { ru: 'На случай вечернего ветерка', en: 'Handy for evening breeze' } },
-            top: { ru: 'Спортивная футболка из дышащего трикотажа', en: 'Breathable athletic T-shirt', desc: { ru: 'Комфорт при любой активности', en: 'Cool during any activity' } },
-            bottom: { ru: 'Лёгкие джоггеры или спортивные штаны', en: 'Lightweight joggers or track pants', desc: { ru: 'Свобода движений', en: 'Full freedom of movement' } },
-            shoes: { ru: 'Лёгкие сетчатые кроссовки', en: 'Lightweight mesh trainers', desc: { ru: 'Отличная вентиляция стопы', en: 'Great foot ventilation' } },
+            outer: {
+              ru: 'Тонкая ветровка в рюкзак (на вечер)',
+              en: 'Packable windbreaker (for evening)',
+              desc: {
+                ru: 'Днём в такую погоду верхний слой не понадобится, но ближе к закату лёгкая ветровка пригодится. Она занимает минимум места и спасает от вечернего ветерка.',
+                en: 'You will not need a jacket by day, but a packable shell comes in handy after sunset. It takes virtually zero bag space and blocks evening breezes.',
+              },
+            },
+            top: {
+              ru: 'Спортивная футболка из дышащего трикотажа',
+              en: 'Breathable athletic T-shirt',
+              desc: {
+                ru: 'Смесовый хлопок или функциональный трикотаж приятно охлаждает кожу при активности. Свободная посадка не сковывает плечи и корпус.',
+                en: 'Cotton-blend or performance jersey keeps skin cool during active errands. A relaxed cut leaves shoulders completely unrestricted.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие джоггеры или спортивные штаны',
+              en: 'Lightweight joggers or track pants',
+              desc: {
+                ru: 'Тонкий дышащий трикотаж идеален для комфортной температуры около +18°C. В них удобно и прогуляться в парке, и заехать на тренировку.',
+                en: 'Light, breathable jersey hits the sweet spot around +18°C. Equally comfortable for a park walk or a casual gym session.',
+              },
+            },
+            shoes: {
+              ru: 'Лёгкие сетчатые кроссовки',
+              en: 'Lightweight mesh trainers',
+              desc: {
+                ru: 'Воздухопроницаемый верх из инженерной сетки поддерживает свежесть стоп весь день. Гибкая подошва делает каждый шаг максимально естественным.',
+                en: 'Engineered mesh uppers keep air flowing so your feet stay fresh all day. A flexible sole supports a natural, effortless stride.',
+              },
+            },
           },
           warm: {
-            outer: { ru: 'Верхний слой не нужен', en: 'No outer layer needed', desc: { ru: 'Оптимально для спорта и прогулок', en: 'Ideal for workouts & walks' } },
-            top: { ru: 'Лёгкая функциональная футболка (Dry-Fit)', en: 'Lightweight moisture-wicking tee', desc: { ru: 'Быстро сохнет и не липнет к телу', en: 'Quick-drying & breathable' } },
-            bottom: { ru: 'Спортивные шорты или велосипедки', en: 'Athletic shorts or biker shorts', desc: { ru: 'Максимальная свобода в тёплую погоду', en: 'Maximum mobility in warm weather' } },
-            shoes: { ru: 'Дышащие беговые кроссовки', en: 'Breathable running shoes', desc: { ru: 'Сетчатый верх и лёгкая подошва', en: 'Airy mesh upper & light sole' } },
+            outer: {
+              ru: 'Верхний слой не нужен',
+              en: 'No outer layer needed',
+              desc: {
+                ru: 'Тёплый воздух позволяет двигаться налегке без куртки или кофты. Оптимальные условия для активного дня на свежем воздухе.',
+                en: 'Warm air lets you move completely unencumbered without jackets or hoodies. Ideal conditions for an active day outdoors.',
+              },
+            },
+            top: {
+              ru: 'Лёгкая функциональная футболка (Dry-Fit)',
+              en: 'Lightweight moisture-wicking tee',
+              desc: {
+                ru: 'Технологичная ткань мгновенно отводит влагу на поверхность, где она быстро испаряется. Футболка не тяжелеет и не прилипает даже в движении.',
+                en: 'Performance fibers pull sweat to the surface for rapid evaporation. The shirt stays featherlight and never clings while you move.',
+              },
+            },
+            bottom: {
+              ru: 'Спортивные шорты или велосипедки',
+              en: 'Athletic shorts or biker shorts',
+              desc: {
+                ru: 'Максимальная свобода движений и отличная вентиляция в тёплую погоду. Эластичный пояс надёжно фиксирует посадку без давления.',
+                en: 'Maximum freedom of movement and cooling airflow in warm weather. An elastic waistband stays secure without pinching.',
+              },
+            },
+            shoes: {
+              ru: 'Дышащие беговые кроссовки',
+              en: 'Breathable running shoes',
+              desc: {
+                ru: 'Крупная вентиляционная сетка активно отводит тепло от стопы при ходьбе по тёплому асфальту. Лёгкая пена обеспечивает мягкую амортизацию.',
+                en: 'Open-weave mesh vents heat away from your feet on warm sidewalks. Lightweight foam keeps cushioning responsive all day.',
+              },
+            },
           },
           hot: {
-            outer: { ru: 'Без верхней одежды', en: 'No outerwear', desc: { ru: 'Максимум охлаждения в жару', en: 'Maximum cooling in heat' } },
-            top: { ru: 'Сверхлёгкая спортивная майка или футболка с перфорацией', en: 'Ultralight singlet or perforated tee', desc: { ru: 'Мгновенный отвод тепла и влаги', en: 'Instant heat & sweat release' } },
-            bottom: { ru: 'Лёгкие беговые шорты', en: 'Lightweight running shorts', desc: { ru: 'Невесомый дышащий материал', en: 'Featherlight breathable fabric' } },
-            shoes: { ru: 'Максимально вентилируемые кроссовки', en: 'Ultra-ventilated mesh sneakers', desc: { ru: 'Чтобы ноги не перегревались', en: 'Keeps feet cool in peak heat' } },
+            outer: {
+              ru: 'Без верхней одежды',
+              en: 'No outerwear',
+              desc: {
+                ru: 'В сильную жару важно не задерживать тепло у тела. Оставь любые дополнительные слои дома для максимального охлаждения.',
+                en: 'Keeping heat from trapping against your body is crucial in high heat. Leave all extra layers behind for maximum cooling.',
+              },
+            },
+            top: {
+              ru: 'Сверхлёгкая спортивная майка или футболка с перфорацией',
+              en: 'Ultralight singlet or perforated tee',
+              desc: {
+                ru: 'Микроперфорация и невесомый материал создают эффект естественного обдува при каждом шаге. Светлые оттенки меньше нагреваются под прямым солнцем.',
+                en: 'Micro-perforations and featherweight fabric create natural airflow with every step. Light colors reflect harsh overhead sunlight.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие беговые шорты',
+              en: 'Lightweight running shorts',
+              desc: {
+                ru: 'Тончайшая быстросохнущая ткань с боковыми разрезами абсолютно не мешает движению и мгновенно проветривается. Лучший выбор для +30°C и выше.',
+                en: 'Ultralight quick-dry fabric with side splits maximizes ventilation and mobility. The top choice for +30°C and above.',
+              },
+            },
+            shoes: {
+              ru: 'Максимально вентилируемые кроссовки',
+              en: 'Ultra-ventilated mesh sneakers',
+              desc: {
+                ru: 'Полупрозрачный сетчатый верх пропускает воздух со всех сторон, защищая ноги от перегрева и отёчности в зной.',
+                en: 'Translucent engineered mesh lets air flow from every angle, preventing hot spots and swelling in intense heat.',
+              },
+            },
           },
         },
 
         classic: {
           arctic: {
-            outer: { ru: 'Длинное двубортное шерстяное пальто с утеплителем', en: 'Heavy insulated double-breasted wool coat', desc: { ru: 'Безупречный классический силуэт и тепло', en: 'Timeless tailored warmth' } },
-            top: { ru: 'Кашемировый джемпер поверх классической сорочки', en: 'Cashmere sweater over a dress shirt', desc: { ru: 'Многослойная классика для морозов', en: 'Layered classic elegance for frost' } },
-            bottom: { ru: 'Классические брюки из плотной шерсти (или юбка-миди)', en: 'Heavyweight wool dress trousers (or midi skirt)', desc: { ru: 'Держат стрелку и защищают от холода', en: 'Holds a crisp crease in winter' } },
-            shoes: { ru: 'Утеплённые кожаные ботинки на ранту или сапоги', en: 'Shearling-lined leather dress boots', desc: { ru: 'Классический профиль + зимняя подошва', en: 'Dress profile with winter grip' } },
+            outer: {
+              ru: 'Длинное двубортное шерстяное пальто с утеплителем',
+              en: 'Heavy insulated double-breasted wool coat',
+              desc: {
+                ru: 'Двубортный запах создаёт двойной барьер от ледяного ветра в области груди, а внутренний утеплитель греет не хуже пуховика. Безупречный деловой силуэт для суровой зимы.',
+                en: 'A double-breasted front doubles wind protection across your chest while hidden insulation rivals a parka. Timeless formal tailoring for harsh winters.',
+              },
+            },
+            top: {
+              ru: 'Кашемировый джемпер поверх классической сорочки',
+              en: 'Cashmere sweater over a dress shirt',
+              desc: {
+                ru: 'Тонкий кашемир обладает исключительной теплоизоляцией и легко помещается под пальто. Воротник сорочки сохраняет строгий офисный дресс-код.',
+                en: 'Fine cashmere delivers exceptional warmth without bulk beneath an overcoat. A crisp shirt collar preserves strict business dress codes.',
+              },
+            },
+            bottom: {
+              ru: 'Классические брюки из плотной шерсти (или юбка-миди)',
+              en: 'Heavyweight wool dress trousers (or midi skirt)',
+              desc: {
+                ru: 'Плотная костюмная шерсть с подкладкой до колена надёжно защищает от мороза и держит чёткую стрелку. Благородная фактура гармонирует с зимним пальто.',
+                en: 'Heavyweight suiting wool lined to the knee blocks winter chill while holding a sharp crease. Rich texture pairs naturally with wool coats.',
+              },
+            },
+            shoes: {
+              ru: 'Утеплённые кожаные ботинки на ранту или сапоги',
+              en: 'Shearling-lined leather dress boots',
+              desc: {
+                ru: 'Рантовая конструкция (Goodyear Welt) приподнимает стопу над холодным тротуаром и защищает от влаги. Аккуратный миндалевидный мыс полностью соответствует классике.',
+                en: 'Goodyear-welted construction elevates your foot above cold pavement and resists moisture. A sleek almond toe maintains classic formality.',
+              },
+            },
           },
           freezing: {
-            outer: { ru: 'Классическое пальто из шерсти и кашемира', en: 'Wool-cashmere tailored overcoat', desc: { ru: 'Строгий крой поверх костюма или пиджака', en: 'Structured fit over suit or blazer' } },
-            top: { ru: 'Классическая рубашка/блуза + тонкий кардиган', en: 'Dress shirt/blouse + fine-knit cardigan', desc: { ru: 'Деловой дресс-код без переохлаждения', en: 'Business dress code with warmth' } },
-            bottom: { ru: 'Костюмные брюки из шерстяного твила', en: 'Wool-twill tailored trousers', desc: { ru: 'Благородная фактура для зимы', en: 'Refined winter suiting fabric' } },
-            shoes: { ru: 'Утеплённые кожаные челси или ботинки дерби', en: 'Lined leather Chelsea or Derby boots', desc: { ru: 'Аккуратный носок и защита от влаги', en: 'Sleek toe & weather protection' } },
+            outer: {
+              ru: 'Классическое пальто из шерсти и кашемира',
+              en: 'Wool-cashmere tailored overcoat',
+              desc: {
+                ru: 'Строгий прямой крой свободно садится поверх костюмной пары, не сминая плечи пиджака. Натуральная шерсть отлично сохраняет тепло при минусовой температуре.',
+                en: 'A structured tailored cut drapes cleanly over a suit jacket without crushing the shoulders. Natural wool retains warmth reliably below freezing.',
+              },
+            },
+            top: {
+              ru: 'Классическая рубашка/блуза + тонкий кардиган',
+              en: 'Dress shirt/blouse + fine-knit cardigan',
+              desc: {
+                ru: 'Тонкий кардиган на пуговицах добавляет необходимый слой тепла и легко снимается в переговорной. Образ остаётся строгим и аккуратным в любой ситуации.',
+                en: 'A fine-knit button cardigan adds essential insulation and removes easily in warm meeting rooms. Keeps your look sharp in any setting.',
+              },
+            },
+            bottom: {
+              ru: 'Костюмные брюки из шерстяного твила',
+              en: 'Wool-twill tailored trousers',
+              desc: {
+                ru: 'Диагональное плетение твила делает ткань более плотной, износостойкой и тёплой. Брюки красиво струятся и не мнутся в течение рабочего дня.',
+                en: 'Diagonal twill weaving makes the fabric denser, warmer, and more durable. These trousers drape cleanly and resist wrinkling all day.',
+              },
+            },
+            shoes: {
+              ru: 'Утеплённые кожаные челси или ботинки дерби',
+              en: 'Lined leather Chelsea or Derby boots',
+              desc: {
+                ru: 'Высокое голенище закрывает щиколотку под брючиной от холодного ветра. Гладкая полированная кожа подчёркивает деловой статус.',
+                en: 'An ankle-high shaft shields your lower leg beneath trouser cuffs from chilly drafts. Polished full-grain leather underscores classic polish.',
+              },
+            },
           },
           cold: {
-            outer: { ru: 'Шерстяное пальто-честерфилд или утеплённый макинтош', en: 'Chesterfield wool coat or lined mackintosh', desc: { ru: 'Деловой внешний вид в прохладу', en: 'Sharp business look in cold weather' } },
-            top: { ru: 'Сорочка/блуза + костюмный пиджак или жилет', en: 'Dress shirt/blouse + tailored blazer', desc: { ru: 'Собранный классический ансамбль', en: 'Complete classic ensemble' } },
-            bottom: { ru: 'Классические брюки со стрелкой или юбка-карандаш', en: 'Creased dress trousers or pencil skirt', desc: { ru: 'Безупречная линия силуэта', en: 'Clean tailored lines' } },
-            shoes: { ru: 'Кожаные оксфорды, дерби или ботильоны', en: 'Leather Oxfords, Derbies or ankle boots', desc: { ru: 'Натуральная гладкая кожа', en: 'Polished full-grain leather' } },
+            outer: {
+              ru: 'Шерстяное пальто-честерфилд или утеплённый макинтош',
+              en: 'Chesterfield wool coat or lined mackintosh',
+              desc: {
+                ru: 'Лаконичное однобортное пальто или макинтош с тёплой подкладкой защищают от сырости и ветра. Универсальная классика для деловых поездок по городу.',
+                en: 'A single-breasted Chesterfield or lined mackintosh blocks damp winds with ease. Timeless outerwear for daily business commutes.',
+              },
+            },
+            top: {
+              ru: 'Сорочка/блуза + костюмный пиджак или жилет',
+              en: 'Dress shirt/blouse + tailored blazer',
+              desc: {
+                ru: 'Костюмный пиджак или жилет удерживают тепло корпуса и формируют чёткий деловой силуэт. Выбирай сорочку из плотного хлопкового твила.',
+                en: 'A tailored blazer or waistcoat locks in core warmth while framing a sharp silhouette. Pair with a crisp twill cotton dress shirt.',
+              },
+            },
+            bottom: {
+              ru: 'Классические брюки со стрелкой или юбка-карандаш',
+              en: 'Creased dress trousers or pencil skirt',
+              desc: {
+                ru: 'Безупречная вертикальная линия визуально вытягивает силуэт и соответствует строгому дресс-коду. Средняя плотность ткани комфортна в прохладную погоду.',
+                en: 'Crisp vertical lines elongate your silhouette and honor formal dress codes. Mid-weight suiting keeps you comfortable in brisk weather.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные оксфорды, дерби или ботильоны',
+              en: 'Leather Oxfords, Derbies or ankle boots',
+              desc: {
+                ru: 'Классическая закрытая обувь из натуральной кожи с профилактикой на подошве защитит от влажного асфальта. Не забудь подобрать носки в тон брюкам.',
+                en: 'Classic closed-toe leather shoes with protective rubber half-soles handle damp sidewalks. Match socks to your trousers for a seamless line.',
+              },
+            },
           },
           cool: {
-            outer: { ru: 'Двубортный тренчкот с поясом', en: 'Belted double-breasted trench coat', desc: { ru: 'Икона классического гардероба в межсезонье', en: 'Iconic mid-season classic outerwear' } },
-            top: { ru: 'Классическая сорочка или шёлковая блуза + блейзер', en: 'Crisp dress shirt or blouse + blazer', desc: { ru: 'Уместно для переговоров и офиса', en: 'Ideal for meetings and office' } },
-            bottom: { ru: 'Классические костюмные брюки', en: 'Tailored suit trousers', desc: { ru: 'Лёгкая костюмная шерсть или вискоза', en: 'Lightweight suiting fabric' } },
-            shoes: { ru: 'Кожаные дерби, лоферы или туфли-лодочки', en: 'Leather Derbies, loafers or classic pumps', desc: { ru: 'Элегантная закрытая обувь', en: 'Elegant closed-toe footwear' } },
+            outer: {
+              ru: 'Двубортный тренчкот с поясом',
+              en: 'Belted double-breasted trench coat',
+              desc: {
+                ru: 'Водоотталкивающий хлопковый габардин надёжно защищает костюм от ветра и внезапного дождя. Пояс позволяет подчеркнуть силуэт или завязать его небрежным узлом.',
+                en: 'Water-repellent cotton gabardine shields your suit from wind and sudden showers. Belt it cleanly or tie casually for timeless versatility.',
+              },
+            },
+            top: {
+              ru: 'Классическая сорочка или шёлковая блуза + блейзер',
+              en: 'Crisp dress shirt or blouse + blazer',
+              desc: {
+                ru: 'Блейзер защищает от утренней свежести по дороге в офис, а днём в помещении его можно снять. Идеальное сочетание для переговоров и делового обеда.',
+                en: 'A blazer wards off morning chill on your commute and slips off easily indoors. Ideal for client presentations and business lunches.',
+              },
+            },
+            bottom: {
+              ru: 'Классические костюмные брюки',
+              en: 'Tailored suit trousers',
+              desc: {
+                ru: 'Лёгкая костюмная шерсть «четыре сезона» поддерживает комфортную температуру и на улице, и в офисе. Держит аккуратную посадку без заломов.',
+                en: 'Four-season lightweight suiting wool balances outdoor coolness with indoor comfort. Holds a crisp, wrinkle-free drape all day.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные дерби, лоферы или туфли-лодочки',
+              en: 'Leather Derbies, loafers or classic pumps',
+              desc: {
+                ru: 'Элегантная закрытая пара из гладкой кожи завершает собранный деловой образ. Выбирай модели на кожаной или тонкой резиновой подошве.',
+                en: 'Elegant closed-toe smooth leather completes a polished professional ensemble. Choose leather or sleek rubber soles for dry-to-damp streets.',
+              },
+            },
           },
           mild: {
-            outer: { ru: 'Структурированный пиджак или блейзер', en: 'Structured blazer or suit jacket', desc: { ru: 'Ключевой элемент классического образа', en: 'Core piece of classic tailoring' } },
-            top: { ru: 'Хлопковая сорочка с длинным рукавом или блуза', en: 'Long-sleeve cotton dress shirt or blouse', desc: { ru: 'Свежий и опрятный вид весь день', en: 'Crisp and polished all day' } },
-            bottom: { ru: 'Лёгкие классические брюки или юбка-миди', en: 'Lightweight dress trousers or midi skirt', desc: { ru: 'Дышащая костюмная ткань', en: 'Breathable tailored fabric' } },
-            shoes: { ru: 'Кожаные лоферы или оксфорды', en: 'Leather loafers or Oxfords', desc: { ru: 'Классика без утяжеления', en: 'Timeless lightweight footwear' } },
+            outer: {
+              ru: 'Структурированный пиджак или блейзер',
+              en: 'Structured blazer or suit jacket',
+              desc: {
+                ru: 'В мягкую погоду пиджак выступает главным верхним слоем без необходимости в пальто или плаще. Полуподкладка обеспечит отличную воздухопроницаемость.',
+                en: 'In mild weather, a structured blazer serves as your primary outer layer with no coat required. Half-lined construction keeps airflow steady.',
+              },
+            },
+            top: {
+              ru: 'Хлопковая сорочка с длинным рукавом или блуза',
+              en: 'Long-sleeve cotton dress shirt or blouse',
+              desc: {
+                ru: 'Тонкий дышащий поплин или филигранный хлопок дарят свежесть и комфорт на протяжении всего рабочего дня. Чёткие манжеты аккуратно выглядывают из-под рукава пиджака.',
+                en: 'Fine breathable poplin or pinpoint cotton stays fresh through a full workday. Crisp cuffs peek neatly beneath your blazer sleeves.',
+              },
+            },
+            bottom: {
+              ru: 'Лёгкие классические брюки или юбка-миди',
+              en: 'Lightweight dress trousers or midi skirt',
+              desc: {
+                ru: 'Воздушная костюмная ткань не перегревает на дневном солнце и сохраняет строгую геометрию кроя. Универсальный выбор для офиса в межсезонье.',
+                en: 'Airy suiting fabric prevents overheating in midday sun while keeping sharp tailored lines. A reliable mid-season office staple.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные лоферы или оксфорды',
+              en: 'Leather loafers or Oxfords',
+              desc: {
+                ru: 'Лёгкая классическая обувь без тяжёлой подкладки даёт ногам дышать в комфортную погоду. Пенни-лоферы или тассел-лоферы добавят образу европейской элегантности.',
+                en: 'Unlined or lightweight dress shoes let your feet breathe in mild temperatures. Penny or tassel loafers add effortless European elegance.',
+              },
+            },
           },
           warm: {
-            outer: { ru: 'Лёгкий льняной блейзер (для помещений)', en: 'Lightweight linen blazer (for indoors)', desc: { ru: 'На случай кондиционеров в офисе', en: 'Handy for air-conditioned offices' } },
-            top: { ru: 'Сорочка из тонкого поплина или шёлковый топ', en: 'Fine poplin dress shirt or silk top', desc: { ru: 'Дышит в тёплую погоду, сохраняя дресс-код', en: 'Breathable while keeping dress code' } },
-            bottom: { ru: 'Брюки из тонкой шерсти Cool Wool или смесового льна', en: 'Cool-wool or linen-blend dress trousers', desc: { ru: 'Созданы специально для тепла', en: 'Tailored specifically for warm days' } },
-            shoes: { ru: 'Кожаные или замшевые лоферы', en: 'Leather or suede loafers', desc: { ru: 'Лёгкая классическая пара', en: 'Light dress footwear' } },
+            outer: {
+              ru: 'Лёгкий льняной блейзер (для помещений)',
+              en: 'Lightweight linen blazer (for indoors)',
+              desc: {
+                ru: 'На улице его можно не надевать, но в офисе с кондиционером или на официальной встрече он мгновенно соберёт образ. Смесовый лён с шерстью меньше мнётся.',
+                en: 'Skip it outdoors, then slip it on in air-conditioned offices or formal meetings. A linen-wool blend drapes sharply while resisting heavy wrinkles.',
+              },
+            },
+            top: {
+              ru: 'Сорочка из тонкого поплина или шёлковый топ',
+              en: 'Fine poplin dress shirt or silk top',
+              desc: {
+                ru: 'Тончайшее плетение нити пропускает воздух и приятно холодит кожу в тёплый день. Светлые оттенки белого, голубого или экрю выглядят максимально свежо.',
+                en: 'Ultra-fine weaves allow constant airflow and feel cool against your skin. Crisp white, sky blue, or ecru tones look effortlessly fresh.',
+              },
+            },
+            bottom: {
+              ru: 'Брюки из тонкой шерсти Cool Wool или смесового льна',
+              en: 'Cool-wool or linen-blend dress trousers',
+              desc: {
+                ru: 'Специальная крутка нити Cool Wool отводит тепло лучше обычного хлопка, сохраняя безупречный деловой вид. Идеально для летнего дресс-кода.',
+                en: 'High-twist Cool Wool dissipates heat even better than cotton while keeping formal polish. Tailored specifically for warm-weather dress codes.',
+              },
+            },
+            shoes: {
+              ru: 'Кожаные или замшевые лоферы',
+              en: 'Leather or suede loafers',
+              desc: {
+                ru: 'Мягкая неструктурированная конструкция без жёсткого задника ощущается почти как тапочки. Отлично сочетаются с укороченными летними брюками.',
+                en: 'Soft, unconstructed uppers without stiff heel counters feel nearly weightless. Pair cleanly with slightly cropped summer dress trousers.',
+              },
+            },
           },
           hot: {
-            outer: { ru: 'Без пиджака (или в руках до офиса)', en: 'No jacket (or carry until indoors)', desc: { ru: 'Летний деловой комфорт', en: 'Summer business comfort' } },
-            top: { ru: 'Светлая сорочка из льна и хлопка', en: 'Light-colored linen-cotton dress shirt', desc: { ru: 'Отражает солнце и даёт телу дышать', en: 'Reflects sun & lets skin breathe' } },
-            bottom: { ru: 'Светлые классические брюки из тонкого льна', en: 'Light tailored linen trousers', desc: { ru: 'Элегантность даже в +30°C', en: 'Refined elegance even at +30°C' } },
-            shoes: { ru: 'Лёгкие лоферы на тонкой подошве', en: 'Lightweight thin-sole loafers', desc: { ru: 'Минимум веса и максимум стиля', en: 'Minimal weight, maximum polish' } },
+            outer: {
+              ru: 'Без пиджака (или в руках до офиса)',
+              en: 'No jacket (or carry until indoors)',
+              desc: {
+                ru: 'В пик летнего зноя лучше идти по улице без пиджака, чтобы не перегреваться. При необходимости надень лёгкий блейзер уже в прохладном помещении.',
+                en: 'Walk outdoors without a jacket during peak summer heat to stay cool. Slip a lightweight blazer on once inside air-conditioned spaces.',
+              },
+            },
+            top: {
+              ru: 'Светлая сорочка из льна и хлопка',
+              en: 'Light-colored linen-cotton dress shirt',
+              desc: {
+                ru: 'Сочетание льна и хлопка даёт максимальную воздухопроницаемость и более аккуратный вид, чем чистый лён. Свободный воротник обеспечит комфорт в жару.',
+                en: 'A linen-cotton blend delivers maximum breathability with a crisper finish than pure linen. A slightly relaxed collar keeps you comfortable in heat.',
+              },
+            },
+            bottom: {
+              ru: 'Светлые классические брюки из тонкого льна',
+              en: 'Light tailored linen trousers',
+              desc: {
+                ru: 'Светло-бежевые, молочные или светло-серые брюки отражают солнечные лучи и позволяют телу дышать. Прямой свободный крой усиливает естественную вентиляцию.',
+                en: 'Ivory, sand, or light grey trousers reflect solar heat while letting skin breathe. A straight, airy cut enhances natural airflow.',
+              },
+            },
+            shoes: {
+              ru: 'Лёгкие лоферы на тонкой подошве',
+              en: 'Lightweight thin-sole loafers',
+              desc: {
+                ru: 'Тонкая гибкая подошва и мягкая дышащая кожа обеспечивают комфорт даже в +30°C и выше. Безупречное завершение летнего классического гардероба.',
+                en: 'Thin flexible soles and supple breathable leather keep feet comfortable above +30°C. The ultimate finish for warm-weather classic dressing.',
+              },
+            },
           },
         },
       };
@@ -1773,23 +2564,23 @@
       const verdictParts = [];
       if (lang === 'ru') {
         if (band === 'arctic' || band === 'freezing') {
-          verdictParts.push('На улице морозно — делай ставку на надёжное утепление и защиту от ветра.');
+          verdictParts.push('На улице морозно — делай ставку на надёжное утепление, закрытую шею и защиту от ветра. Правильная комбинация термослоя и плотной верхней одежды сохранит тепло даже при долгой прогулке.');
         } else if (band === 'cold') {
-          verdictParts.push('Прохладно и свежо: лучше всего сработает многослойный комплект, который легко адаптировать.');
+          verdictParts.push('Прохладно и свежо: лучше всего сработает многослойный комплект, который легко адаптировать под помещение или транспорт. Выбирай плотные фактуры, которые не продуваются ветерком.');
         } else if (band === 'cool') {
-          verdictParts.push('Комфортная прохлада — лёгкая верхняя одежда защитит от ветерка без перегрева.');
+          verdictParts.push('Комфортная прохлада — лёгкая верхняя одежда защитит от ветерка без перегрева на солнце. Удобнее всего собрать образ из дышащей базы и накидки, которую легко снять днём.');
         } else if (band === 'mild') {
-          verdictParts.push('Идеальная мягкая погода: достаточно базового слоя, а лёгкую накидку возьми разве что на вечер.');
+          verdictParts.push('Идеальная мягкая погода: достаточно базового слоя из натуральных тканей, а лёгкую накидку возьми разве что на вечер. Такой баланс позволит чувствовать себя уверенно весь день.');
         } else {
-          verdictParts.push('На улице тепло — выбирай дышащие натуральные ткани и минимум слоёв.');
+          verdictParts.push('На улице тепло — выбирай дышащие натуральные ткани, свободный крой и минимум слоёв. Светлые оттенки помогут меньше нагреваться под прямыми солнечными лучами.');
         }
 
         if (isRain) {
-          verdictParts.push('Ожидаются осадки, поэтому пригодится влагостойкая обувь и зонт.');
+          verdictParts.push('Ожидаются осадки, поэтому обязательно пригодится влагостойкая обувь и складной зонт.');
         } else if (isSnow) {
-          verdictParts.push('Возможен снег — выбирай обувь с хорошим сцеплением и немаркий низ.');
+          verdictParts.push('Возможен снег — выбирай обувь с цепким протектором и немаркий низ.');
         } else if (isWindy) {
-          verdictParts.push(`Ощутимый ветер до ${Math.round(weather.windSpeed)} км/ч делает воздух прохладнее, чем на термометре.`);
+          verdictParts.push(`Ощутимый ветер до ${Math.round(weather.windSpeed)} км/ч делает воздух прохладнее, чем показывает термометр.`);
         }
 
         if (hasBigSwing) {
@@ -1797,27 +2588,27 @@
         }
 
         if (transport === 'car') {
-          verdictParts.push('Так как ты на машине, избегай слишком громоздкой одежды в пользу удобных слоёв.');
+          verdictParts.push('Так как ты на машине, избегай слишком длинной и громоздкой одежды в пользу удобных мобильных слоёв.');
         }
       } else {
         if (band === 'arctic' || band === 'freezing') {
-          verdictParts.push('It is freezing outside — prioritize solid thermal insulation and wind protection.');
+          verdictParts.push('It is freezing outside — prioritize solid thermal insulation, a covered neck, and wind protection. Pairing a thermal base with dense outerwear will keep you warm even on longer walks.');
         } else if (band === 'cold') {
-          verdictParts.push('Crisp and chilly: a smart layered outfit will keep you comfortable all day.');
+          verdictParts.push('Crisp and chilly: a smart layered outfit will adapt smoothly between cold streets and warm interiors. Stick to wind-resistant weaves that hold warmth without bulk.');
         } else if (band === 'cool') {
-          verdictParts.push('Pleasantly cool — a light outer layer blocks the breeze without overheating.');
+          verdictParts.push('Pleasantly cool — a light outer layer blocks the breeze without overheating in the sun. Combining a breathable base with an easy-to-remove top layer works best.');
         } else if (band === 'mild') {
-          verdictParts.push('Mild and comfortable weather: a single breathable base is enough, with a light layer for evening.');
+          verdictParts.push('Mild and comfortable weather: a single breathable base is enough, with a light layer tucked away for evening. This setup keeps you effortless from morning to night.');
         } else {
-          verdictParts.push('Warm outdoors — stick to breathable fabrics and minimal layers.');
+          verdictParts.push('Warm outdoors — stick to breathable natural fabrics, relaxed silhouettes, and minimal layers. Lighter colors will help reflect direct afternoon sunlight.');
         }
 
         if (isRain) {
-          verdictParts.push('Rain is expected, so bring an umbrella and water-resistant footwear.');
+          verdictParts.push('Rain is expected, so bring a compact umbrella and water-resistant footwear.');
         } else if (isSnow) {
           verdictParts.push('Snow is likely — wear high-traction boots and weather-ready outerwear.');
         } else if (isWindy) {
-          verdictParts.push(`Breezy winds up to ${Math.round(weather.windSpeed)} km/h make it feel cooler than the thermometer.`);
+          verdictParts.push(`Breezy winds up to ${Math.round(weather.windSpeed)} km/h make it feel cooler than the thermometer suggests.`);
         }
 
         if (hasBigSwing) {
@@ -2046,6 +2837,7 @@
 
         state.isSimulated = false;
         state.simulatedWeather = null;
+        state.activePresetId = null;
         state.selectedDayIndex = 0;
         state.forecastBundle = buildForecastBundleFromApi(data);
         saveState();
@@ -2515,21 +3307,59 @@
       const grid = document.getElementById('simulatorPresetsGrid');
       if (!grid) return;
 
-      grid.innerHTML = SIMULATOR_PRESETS.map((preset) => {
+      const isDefaultActive = !state.isSimulated;
+      const defaultCardHTML = `
+        <button
+          type="button"
+          id="simDefaultBtn"
+          class="text-left p-3 rounded-2xl active:scale-95 border transition ${
+            isDefaultActive
+              ? 'bg-emerald-500/20 border-emerald-400/50 shadow-md shadow-emerald-950/20'
+              : 'bg-white/8 hover:bg-white/15 border-white/12'
+          }"
+        >
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">🔄</span>
+            <span class="text-xs sm:text-sm font-bold text-white">${t('simDefaultTitle')}</span>
+          </div>
+          <div class="text-[11px] ${isDefaultActive ? 'text-emerald-200' : 'text-slate-300'}">${t('simDefaultSubtitle')}</div>
+        </button>
+      `;
+
+      const presetsHTML = SIMULATOR_PRESETS.map((preset) => {
+        const isPresetActive = state.isSimulated && state.activePresetId === preset.id;
         return `
           <button
             type="button"
             data-preset-id="${preset.id}"
-            class="sim-preset-btn text-left p-3 rounded-2xl bg-white/8 hover:bg-white/15 active:scale-95 border border-white/12 transition"
+            class="sim-preset-btn text-left p-3 rounded-2xl active:scale-95 border transition ${
+              isPresetActive
+                ? 'bg-amber-500/20 border-amber-300/55 shadow-md shadow-amber-950/20'
+                : 'bg-white/8 hover:bg-white/15 border-white/12'
+            }"
           >
             <div class="flex items-center gap-2 mb-1">
               <span class="text-lg">${preset.emoji}</span>
               <span class="text-xs sm:text-sm font-bold text-white">${preset.title[state.lang]}</span>
             </div>
-            <div class="text-[11px] text-slate-300">${preset.subtitle[state.lang]}</div>
+            <div class="text-[11px] ${isPresetActive ? 'text-amber-100' : 'text-slate-300'}">${preset.subtitle[state.lang]}</div>
           </button>
         `;
       }).join('');
+
+      grid.innerHTML = defaultCardHTML + presetsHTML;
+
+      const defaultBtn = document.getElementById('simDefaultBtn');
+      if (defaultBtn) {
+        defaultBtn.addEventListener('click', () => {
+          state.isSimulated = false;
+          state.simulatedWeather = null;
+          state.activePresetId = null;
+          state.selectedDayIndex = 0;
+          renderAll();
+          showToast(t('simDefaultToast'));
+        });
+      }
 
       grid.querySelectorAll('.sim-preset-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -2537,6 +3367,7 @@
           const preset = SIMULATOR_PRESETS.find((p) => p.id === id);
           if (!preset) return;
           state.isSimulated = true;
+          state.activePresetId = preset.id;
           state.simulatedWeather = JSON.parse(JSON.stringify(preset.weather));
           state.selectedDayIndex = 0;
           renderAll();
@@ -2633,6 +3464,7 @@
           const idx = Number(btn.getAttribute('data-day-idx'));
           state.isSimulated = false;
           state.simulatedWeather = null;
+          state.activePresetId = null;
           state.selectedDayIndex = idx;
           renderAll();
         });
@@ -2816,7 +3648,7 @@
                   <span class="text-[11px] uppercase tracking-wider font-bold text-sky-200/90">${card.category}</span>
                   <span class="w-8 h-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-base">${card.icon}</span>
                 </div>
-                <h4 class="text-base sm:text-lg font-extrabold text-white leading-snug mb-1.5">${card.title}</h4>
+                <h4 class="text-base sm:text-lg font-extrabold text-white leading-snug mb-2">${card.title}</h4>
               </div>
               <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${card.desc}</p>
             </article>
@@ -2955,6 +3787,7 @@
         backBtn.addEventListener('click', () => {
           state.isSimulated = false;
           state.simulatedWeather = null;
+          state.activePresetId = null;
           state.selectedDayIndex = 0;
           renderAll();
         });
